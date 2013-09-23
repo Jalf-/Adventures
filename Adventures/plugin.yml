@@ -1,0 +1,16 @@
+name: Adventures
+version: 0.1
+main: me._Jalf_.Adventures.Main
+description: Adventure plugin with spells
+author: _Jalf_
+
+commands:
+    adventures:
+        description: This is the Adventures command.
+        usage: |
+            /adventures points
+            /adventures resource
+            /adventures spell
+            /adventures castingtype
+            /adventures reload
+            /adventures class
