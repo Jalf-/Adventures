@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 
 public class PlayerResource implements Listener
@@ -35,17 +36,27 @@ public class PlayerResource implements Listener
 	@EventHandler
 	public void givePlayerResource(PlayerJoinEvent event) 
 	{
-		Player player = event.getPlayer();
-		if (plugin.getSaves().isSet(player.getName() + ".Class"))
+		final Player player = event.getPlayer();
+
+		plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable()
 		{
-			if (plugin.getClasses().contains(plugin.getSaves().getString(player.getName() + ".Class")) && 
-					!plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
+			@Override
+			public void run() 
 			{
-				String resourceName = Methods.getPlayerResourceName(player.getName());
-				ScoreboardHandler.registerBoard(player.getName(), resourceName);
-				plugin.getServer().getScheduler().runTaskTimer(plugin, new ResourceRegenTask(player, plugin), 0, 20);
+				if (plugin.getSaves().isSet(player.getName() + ".Class"))
+				{
+					if (plugin.getClasses().contains(plugin.getSaves().getString(player.getName() + ".Class")))
+					{
+						if (!plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
+						{
+							String resourceName = Methods.getPlayerResourceName(player.getName());
+							ScoreboardHandler.registerBoard(player.getName(), resourceName);
+						}
+						plugin.getServer().getScheduler().runTaskTimer(plugin, new ResourceRegenTask(player, plugin), 0, 20);
+					}
+				}
 			}
-		}
+		}, 5);
 	}
 	
 	@EventHandler

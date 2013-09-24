@@ -1,1 +1,16 @@
 # Config
+Exp Boost: 100.0
+Resource:
+  Mana:
+    Regen: 5
+  Power:
+    Regen: 15
+    Degen: 5
+  Fury:
+    Regen: 5
+    Degen: 3
+  Concentration:
+    Regen: 25
+    Degen: 35
+  Energy:
+    Regen: 25

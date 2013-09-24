@@ -45,6 +45,8 @@ public class CommandHandler implements CommandExecutor
 			String reloadUsage = "/adventures reload <config, spells, saves>";
 			String classUsage = "/adventures class set <playerName> <className>";
 			
+//			String partyUsage = "/adventures party ";
+			
 			if (args.length == 1)
 			{
 				if (args[0].equalsIgnoreCase("resource")) sender.sendMessage(resourceUsage);
@@ -379,8 +381,8 @@ public class CommandHandler implements CommandExecutor
 								if (plugin.getSaves().getInt(player.getName() + ".Spells." + spell + ".PointsUsed") < 
 										plugin.getSaves().getInt(player.getName() + ".Spells." + spell + ".Points"))
 								{
-									if (plugin.getSaves().getInt(player.getName() + ".Spells." + spell + "." + args[2]) < 
-											(2 * plugin.getSpellPoints().getInt(spell + "." + args[2])))
+									if (Math.abs(plugin.getSaves().getInt(player.getName() + ".Spells." + spell + "." + args[2])) < 
+											(Math.abs(2 * plugin.getSpellPoints().getInt(spell + "." + args[2]))))
 									{
 										String path = player.getName() + ".Spells." + spell + "." + args[2];
 										plugin.getSaves().set(path, plugin.getSaves().getInt(path) + plugin.getSpellPoints().getInt(spell + "." + args[2]));

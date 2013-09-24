@@ -85,6 +85,7 @@ public class Main extends JavaPlugin
 	    new DontDropSpell(this);
 	    new ProjectileHit(this);
 	    new ClassHandler(this);
+	    new PartyHandler(this);
 	    
 	    // Spell Register
 	    new FireWall(this);
@@ -126,22 +127,28 @@ public class Main extends JavaPlugin
 	    new FoulPlay(this);
 	    
 	    // End of Spell Register
-		getConfig().options().copyDefaults(true);
-		saveConfig();
-		
+	    
+	    File configFile = new File(this.getDataFolder(), "config.yml");	    
+	    if (!configFile.exists())
+	    {
+	    	getConfig().options().copyDefaults(true);
+	    	saveConfig();
+	    }
 		reloadSaves();
 		reloadSpells();
 		
 		getCommand("adventures").setExecutor(new CommandHandler(this));
-
+		
 		for (Player player : Bukkit.getOnlinePlayers())
 		{
-			if (getClasses().contains(getSaves().getString(player.getName() + ".Class")) && 
-					!getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
+			if (getClasses().contains(getSaves().getString(player.getName() + ".Class")))	
 			{
-				String resourceName = Methods.getPlayerResourceName(player.getName());
-				ScoreboardHandler.registerBoard(player.getName(), resourceName);
-				this.getServer().getScheduler().runTaskTimer(this, new ResourceRegenTask(player, this), 0, 20);
+				if (!getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
+				{
+					String resourceName = Methods.getPlayerResourceName(player.getName());
+					ScoreboardHandler.registerBoard(player.getName(), resourceName);
+				}
+				getServer().getScheduler().runTaskTimer(this, new ResourceRegenTask(player, this), 0, 20);
 			}
 		}
 	}	
