@@ -69,6 +69,12 @@ public class ClassHandler implements Listener
 		Player player = event.getPlayer();
 		int prevLevel = event.getOldLevel();
 		int newLevel = event.getNewLevel();
+		
+		if (newLevel > 100)
+		{
+			player.setLevel(100);
+		}
+		
 		String playerClass = plugin.getSaves().getString(player.getName() + ".Class");
 		
 		// Setting Resource
