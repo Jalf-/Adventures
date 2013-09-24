@@ -359,4 +359,15 @@ public class Methods
 			return false;
 		}
 	}
+	
+	public static List<String> getPartyMembers(String name)
+	{
+		List<String> members = new ArrayList<>();
+		
+		members.add("Dude");
+		members.add("Oi");
+		members.add("Bot");
+		
+		return members;
+	}
 }
