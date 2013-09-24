@@ -341,56 +341,7 @@ public class SpellHandler extends Main implements Listener
 			player.getInventory().setHeldItemSlot(prevSlot);
 		}
 	}
-	
-//	public class CooldownTask extends BukkitRunnable
-//	{
-//		public final Player player;
-//		public final int newSlot;
-//		public final long cooldown;
-//		public final String itemMeta;
-//		public final ItemStack itemStackSpell;
-//
-//		public CooldownTask(Player player, int newSlot, long cooldown, String itemMeta, ItemStack itemStackSpell) 
-//		{
-//			this.player = player;
-//			this.newSlot = newSlot;
-//			this.cooldown = cooldown;
-//			this.itemMeta = itemMeta;
-//			this.itemStackSpell = itemStackSpell;
-//		}
-//		@Override
-//		public void run() 
-//		{
-//			if (cooldown <= 40)
-//			{
-//				player.getInventory().setItem(newSlot, itemStackSpell);
-//			}
-//			else
-//			{
-//				ItemStack cooldownItemGreen = new ItemStack(Material.WOOL, 1, (short) 5);
-//				ItemMeta cooldownMetaGreen = cooldownItemGreen.getItemMeta();
-//				cooldownMetaGreen.setDisplayName("Cooldown");
-//
-//				List<String> cooldownItemLoreGreen = new ArrayList<>();
-//				cooldownItemLoreGreen.add(itemMeta + " is on cooldown!");
-//				cooldownMetaGreen.setLore(cooldownItemLoreGreen);
-//
-//				cooldownItemGreen.setItemMeta(cooldownMetaGreen);
-//
-//				player.getInventory().setItem(newSlot, cooldownItemGreen);
-//
-//				plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable() 
-//				{		
-//					@Override
-//					public void run() 
-//					{
-//						player.getInventory().setItem(newSlot, itemStackSpell);
-//					}
-//				}, 40);
-//			}
-//		}
-//	}
-	
+
 	@EventHandler
 	public void resetJoinSpells (PlayerJoinEvent event)
 	{
