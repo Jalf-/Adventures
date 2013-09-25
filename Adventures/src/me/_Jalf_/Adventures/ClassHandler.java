@@ -72,7 +72,7 @@ public class ClassHandler implements Listener
 		
 		if (newLevel > 100)
 		{
-			player.setLevel(137);
+			player.setLevel(100);
 		}
 		
 		String playerClass = plugin.getSaves().getString(player.getName() + ".Class");
