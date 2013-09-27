@@ -2,7 +2,6 @@ package me._Jalf_.Adventures;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import me._Jalf_.Adventures.Spells.*;
 
@@ -37,6 +36,7 @@ public class SpellHandler extends Main implements Listener
 		Action action = event.getAction();
 		Player player = event.getPlayer();
 
+		// Event for casting spell if casting type is click casting 
 		if (event.hasBlock() || event.hasItem())
 		{
 			if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
@@ -79,6 +79,7 @@ public class SpellHandler extends Main implements Listener
 		int newSlot = event.getNewSlot();
 		int prevSlot = event.getPreviousSlot();
 		
+		// Event for casting spell if casting type is instant casting
 		if (player.getInventory().getItem(newSlot) != null)
 		{
 			if (player.getInventory().getItem(newSlot).hasItemMeta() && player.getInventory().getItem(newSlot).getItemMeta().hasDisplayName())
@@ -101,15 +102,27 @@ public class SpellHandler extends Main implements Listener
 		}
 	}
 	
+	/**@param player
+	 * Player Object
+	 * @param itemMeta
+	 * Display name of spell
+	 * @param newSlot
+	 * Slot number where used spell is
+	 * @param prevSlot
+	 * Slot number which should be switched to
+	 */
+	// Casting spell and setting spell on cooldown method
 	public void makeSpell(Player player, String itemMeta, int newSlot, int prevSlot)
 	{
 		String path = player.getName() + ".Spells." + itemMeta;		
 
+		// Check if player has spell
 		if (plugin.getSaves().contains(path))
 		{
 			String resourceName = Methods.getPlayerResourceName(player.getName());
 			
-			int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName));						
+			int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName));
+			// Check if player have enough resource to cast
 			if (resourceNow >= plugin.getSpells().getInt(itemMeta + ".Resource"))
 			{
 				resourceNow = resourceNow - plugin.getSpells().getInt(itemMeta + ".Resource");
@@ -158,8 +171,10 @@ public class SpellHandler extends Main implements Listener
 
 				ItemStack itemStackSpell = Methods.spell(path, itemMeta);
 				
+				// Switch case to use right spell 
 				switch(itemMeta)
 				{
+				// Jalf Register
 				case "Lightning Bolt":
 					LightningBolt.lightningBoltSpell(player, damageValue, radiusValue, rangeValue);
 					break;
@@ -322,10 +337,20 @@ public class SpellHandler extends Main implements Listener
 				case "Eyes Closed":
 					EyesClosed.eyesClosed(player, strengthValue, timeValue);
 					break;
+					
+				// EstTown Register
+				
+					
+					
+				// Xenorexian Register
+					
+					
+					
 				default:
 					System.out.println(itemMeta + " isn't found in the code, but is in the save file! Contact author. Error in : " + SpellHandler.class.getName());
 					break;
 				}
+				// Setting item/spell on cooldown
 				if (cooldownValue <= 40) 
 				{
 					player.getInventory().setItem(newSlot, cooldownItemGreen);
@@ -347,24 +372,27 @@ public class SpellHandler extends Main implements Listener
 	{
 		final Player player = event.getPlayer();
 
+		// Check if player have joined before
 		if (plugin.getSaves().isSet(player.getName() + ".Spells"))
 		{
-			Set<String> playerSpells = plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false);
-
-			for (final String spell : playerSpells)
+			// Checking each item in player inventory
+			for (final ItemStack item : player.getInventory().getContents())
 			{
-				ItemStack[] items = player.getInventory().getContents();
-
-				for (final ItemStack item : items)
+				// Check if item is something
+				if (item != null)
 				{
-					if (item != null)
+					// Check if item has item meta & item has display name
+					if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
 					{
-						if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
+						// Check if display name is equal to 'Cooldown' & if item has lore
+						if (item.getItemMeta().getDisplayName().equalsIgnoreCase("Cooldown") && item.getItemMeta().hasLore())
 						{
-							if (item.getItemMeta().getDisplayName().equalsIgnoreCase("Cooldown") && item.getItemMeta().hasLore())
+							// Checking each spell in player spell repository if it matches with a cooldown item
+							for (final String spell : plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
 							{
 								if (item.getItemMeta().getLore().get(0).replace(" is on cooldown!", "").equalsIgnoreCase(spell))
 								{
+									// Setting cooldown items back on new cooldown
 									plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable() 
 									{		
 										@Override
@@ -388,5 +416,6 @@ public class SpellHandler extends Main implements Listener
 				}
 			}
 		}
+
 	}
 }

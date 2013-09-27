@@ -2,7 +2,6 @@ package me._Jalf_.Adventures;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,32 +22,37 @@ public class Main extends JavaPlugin
 	@Override
 	public void onDisable()
 	{	
+		// Setting static variables to null
 		PlayerResource.playerNoResource = null;
-		
-		Player[] players = getServer().getOnlinePlayers();
 
-		for (Player player : players)
+		// Sets all online players spell off cooldown and gives them the spell which was on cooldown if player have item with the name 'Cooldown'
+		// Saves all online players resource in saves.yml
+		for (Player player : getServer().getOnlinePlayers())
 		{
+			// Check if class isn't Default, because Default can't get any spells
 			if (!getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
 			{
+				// Check if player have  spells in saves.yml
 				if (getSaves().getConfigurationSection(player.getName() + ".Spells") != null)
 				{
-					Set<String> playerSpells = getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false);
-
-					for (String spell : playerSpells)
+					// Getting player inventory
+					for (ItemStack item : player.getInventory().getContents())
 					{
-						ItemStack[] items = player.getInventory().getContents();
-
-						for (ItemStack item : items)
+						// Check if selected slot contains a item
+						if (item != null)
 						{
-							if (item != null)
+							// Check if item has item meta & if item has display name
+							if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
 							{
-								if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
+								// Check if items display name is equal to 'Cooldown' & has lore
+								if (item.getItemMeta().getDisplayName().equalsIgnoreCase("Cooldown") && item.getItemMeta().hasLore())
 								{
-									if (item.getItemMeta().getDisplayName().equalsIgnoreCase("Cooldown") && item.getItemMeta().hasLore())
+									// Check if item with display name 'Cooldown's lore is equal to a spell in players spell repository
+									for (String spell : getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
 									{
 										if (item.getItemMeta().getLore().get(0).replace(" is on cooldown!", "").equalsIgnoreCase(spell))
 										{
+											// Replace cooldown item with expected spell
 											ItemStack spellItem = Methods.spell(player.getName() + ".Spells." + spell, spell);
 											item.setType(spellItem.getType());
 											if (this.getSpells().getInt(spell + ".PlaceHolderDamage") == 0)
@@ -63,21 +67,24 @@ public class Main extends JavaPlugin
 							}
 						}
 					}
+					// Saves all online players resource in saves.yml
 					String resourceName = Methods.getPlayerResourceName(player.getName());      
 					int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName)); 
 					getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", resourceNow);
-					saveSaves();
 				}
 			}
 		}
+		// Save saves.yml
 		reloadSaves();
 		saveSaves();
 		
+		// Cancel all bukkit task from this plugin
 		getServer().getScheduler().cancelTasks(this);
 	}
 	
 	public void onEnable()
 	{
+		// Register all classes that use this class (plugin instance)
 		new SpellHandler(this);  
 	    new PlayerResource(this);
 	    new ScoreboardHandler(this);
@@ -128,17 +135,24 @@ public class Main extends JavaPlugin
 	    
 	    // End of Spell Register
 	    
+	    // Check if config.yml exists, if not then create it
 	    File configFile = new File(this.getDataFolder(), "config.yml");	    
 	    if (!configFile.exists())
 	    {
 	    	getConfig().options().copyDefaults(true);
 	    	saveConfig();
 	    }
+	    // Reload files from datafolder
 		reloadSaves();
 		reloadSpells();
+		reloadConfig();
+		reloadSpellPoints();
+		reloadClasses();
 		
+		// Register commands
 		getCommand("adventures").setExecutor(new CommandHandler(this));
 		
+		// Get all online player and start thier resource regeneration again after a reload
 		for (Player player : Bukkit.getOnlinePlayers())
 		{
 			if (getClasses().contains(getSaves().getString(player.getName() + ".Class")))	
@@ -153,6 +167,7 @@ public class Main extends JavaPlugin
 		}
 	}	
 	
+	// Creating methods for files in datafolder
     private FileConfiguration savesConfig = null;
     private File savesConfigFile = null;
     
@@ -188,6 +203,7 @@ public class Main extends JavaPlugin
         	log.log(Level.SEVERE, "Could not save config to " + savesConfigFile, ex);
         }
     }    
+    
     private FileConfiguration spellsConfig = null;
     private File spellsConfigFile = null;
     
@@ -224,6 +240,7 @@ public class Main extends JavaPlugin
         	log.log(Level.SEVERE, "Could not save config to " + spellsConfigFile, ex);
         }
     }
+    
     private FileConfiguration spellPointsConfig = null;
     private File spellPointsConfigFile = null;
     

@@ -7,6 +7,7 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,12 +16,26 @@ import org.bukkit.util.Vector;
 public class Methods 
 {
 	public static Main plugin;
-
+	
 	public Methods(Main plugin) 
 	{
 		Methods.plugin = plugin;
 	}
 	
+	/**@param loc
+	 * Center point location for circle
+	 * @param r
+	 * Radius for circle
+	 * @param h
+	 * Heigth for circle
+	 * @param hollow
+	 * Option to select if the circle should be hollow
+	 * @param sphere
+	 * Option to select if the circle should be sphere 
+	 * @param plusY
+	 * Value that is added on center point locations y axis
+	 * @return Returns a list of circle locations
+	 */
 	public static List<Location> circle (Location loc, int r, int h, boolean hollow, boolean sphere, int plusY) 
 	{
         List<Location> circleblocks = new ArrayList<Location>();
@@ -41,6 +56,12 @@ public class Methods
         return circleblocks;
     }
 	
+	/**@param path
+	 * String path to spell. Usually "(playerName).Spells.(spellDisplayName)"
+	 * @param itemMeta
+	 * Spell display name
+	 * @return ItemStack connected to spell display name
+	 */
 	public static ItemStack spell (String path, String itemMeta)
 	{
 		// General Spell Attributes
@@ -113,6 +134,10 @@ public class Methods
 		return itemStackSpell;
 	}
 	
+	/**@param player
+	 * Player whose direction is needed
+	 * @return Player direction in f number
+	 */
 	public static int getF(Player player) 
 	{
 	    double d = (player.getLocation().getYaw() * 4.0F / 360.0F) + 0.5D;
@@ -120,6 +145,10 @@ public class Methods
 	    return d < i ? i - 1 : i;
 	}
 	
+	/**@param s
+	 * String that is needed to be tested if its a int
+	 * @return Returns boolean for the result
+	 */
 	public static boolean isInt(String s) 
 	{
 		try 
@@ -132,7 +161,11 @@ public class Methods
 			return false;
 		}
 	}
-
+	
+	/**@param player
+	 * Player whose resource name is needed
+	 * @return Player resource name
+	 */
 	public static String getPlayerResourceName (String player)
 	{
 		if (plugin.getClasses().contains(plugin.getSaves().getString(player + ".Class")))
@@ -146,6 +179,8 @@ public class Methods
 		}
 	}
 	
+	/**@return What materials water can destroy
+	 */
 	public static List<Material> waterDestroy ()
 	{
 		List<Material> waterDestroyList = new ArrayList<>();
@@ -249,12 +284,24 @@ public class Methods
 		return positions;
 	}
 	
+	/**@param v1
+	 * Vector 1
+	 * @param v2
+	 * Vector 2
+	 * @return Angle between vector 1 and vector 2
+	 */
 	public static float getAngleBetweenVectors(Vector v1, Vector v2) 
 	{
 		return Math.abs((float)Math.toDegrees(v1.angle(v2)));
 	}
 	////^Taken from https://forums.bukkit.org/threads/challenge-getting-all-livingentity-in-players-field-of-view.60045/
 	
+	/**@param player
+	 * Player Object
+	 * @param item
+	 * ItemStack wanted to be checked if player has
+	 * @return Boolean depending on outcome
+	 */
 	public static boolean checkPlayerInventoryForItem (Player player, ItemStack item)
 	{
 		int amount = item.getAmount();
@@ -289,6 +336,12 @@ public class Methods
 		}
 	}
 	
+	/**@param player
+	 * Player Object
+	 * @param item
+	 * ItemStack wanted to be taken from player inventory
+	 * @return true if player has enough of that item else return false
+	 */
 	public static boolean takeItemFromPlayerInventory (Player player, ItemStack item)
 	{
 		int amount = item.getAmount();
@@ -324,6 +377,14 @@ public class Methods
 		}
 	}
 	
+	/**@param player
+	 * Player Object
+	 * @param item
+	 * ItemStack wanted to be given to player inventory
+	 * @param split
+	 * Boolean if item is wanted to be split. Example 64 * DIAMOND_HOE would be a single stack if not split
+	 * @return true if player has enough space for item
+	 */
 	public static boolean giveItemToPlayerInventory (Player player, ItemStack item, boolean split)
 	{
 		int freeSpace = 0;
@@ -369,5 +430,28 @@ public class Methods
 		members.add("Bot");
 		
 		return members;
+	}
+	/**@return List of hostile mobs
+	 */
+	public static List<EntityType> hostileMobs()
+	{
+		List<EntityType> entityTypes = new ArrayList<EntityType>();
+
+		entityTypes.add(EntityType.BLAZE);
+		entityTypes.add(EntityType.CAVE_SPIDER);
+		entityTypes.add(EntityType.CREEPER);
+		entityTypes.add(EntityType.ENDERMAN);
+		entityTypes.add(EntityType.GHAST);
+		entityTypes.add(EntityType.GIANT);
+		entityTypes.add(EntityType.MAGMA_CUBE);
+		entityTypes.add(EntityType.PIG_ZOMBIE);
+		entityTypes.add(EntityType.SKELETON);
+		entityTypes.add(EntityType.SLIME);
+		entityTypes.add(EntityType.SPIDER);
+		entityTypes.add(EntityType.WITCH);
+		entityTypes.add(EntityType.WITHER);
+		entityTypes.add(EntityType.ZOMBIE);
+		
+		return entityTypes;
 	}
 }

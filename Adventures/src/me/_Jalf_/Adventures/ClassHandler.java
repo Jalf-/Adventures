@@ -26,7 +26,7 @@ public class ClassHandler implements Listener
 	{
 		Player player = event.getPlayer();
 		
-		// Add Player Setup in saves.yml
+		// Add Player Setup in saves.yml if player haven't joined before
 		if (!plugin.getSaves().isSet(player.getName()))
 		{
 			plugin.getSaves().set(player.getName() + ".Class", "Default");
@@ -53,13 +53,14 @@ public class ClassHandler implements Listener
 		Player player = event.getPlayer();
 		
 		// Set player health
-				player.setMaxHealth(plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health Start") +
-						plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health per Lvl") * player.getLevel());
+		player.setMaxHealth(plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health Start") +
+			plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health per Lvl") * player.getLevel());
 	}
 	
 	@EventHandler
 	public void playerExp (PlayerExpChangeEvent event)
 	{
+		// Multiply gained experience by value specified in config.yml
 		event.setAmount((int) Math.floor(event.getAmount() * (plugin.getConfig().getDouble("Exp Boost") / 100)));
 	}
 	
@@ -70,6 +71,7 @@ public class ClassHandler implements Listener
 		int prevLevel = event.getOldLevel();
 		int newLevel = event.getNewLevel();
 		
+		// Setting player level cap
 		if (newLevel > 100)
 		{
 			player.setLevel(100);
@@ -87,6 +89,7 @@ public class ClassHandler implements Listener
 		player.setMaxHealth(plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health Start") +
 				plugin.getClasses().getInt(plugin.getSaves().getString(player.getName() + ".Class") + ".Health.Health per Lvl") * player.getLevel());
 
+		// Print on level gain or loss
 		if ((newLevel - prevLevel) > 1 && player.getHealth() != 1) player.sendMessage("You gained " + (newLevel - prevLevel) + " levels!");
 		else if ((newLevel - prevLevel) == -1 && player.getHealth() != 1) player.sendMessage("You lost a level!");
 		else if ((newLevel - prevLevel) < -1 && player.getHealth() != 1) player.sendMessage("You lost " + (prevLevel - newLevel) + " levels!");
@@ -95,13 +98,11 @@ public class ClassHandler implements Listener
 		// Checking if player have gained new spell or point to a spell
 		if (plugin.getClasses().contains(playerClass))
 		{
-			Set<String> classSpells = plugin.getClasses().getConfigurationSection(playerClass + ".Spells").getKeys(false);
 			int prevLevelNew = prevLevel;
 			
 			if (prevLevel > newLevel)
 			{
-				Set<String> playerSpells = plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false);
-				for (String playerSpell : playerSpells)
+				for (String playerSpell : plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
 				{
 					plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").set(playerSpell, null);
 				}
@@ -109,7 +110,7 @@ public class ClassHandler implements Listener
 				prevLevelNew = 0;
 			}
 
-			for (String classSpell : classSpells)
+			for (String classSpell : plugin.getClasses().getConfigurationSection(playerClass + ".Spells").getKeys(false))
 			{ 
 				for (int q = prevLevelNew; q < newLevel; q++)
 				{

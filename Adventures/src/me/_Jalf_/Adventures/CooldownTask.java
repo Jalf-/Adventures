@@ -18,6 +18,19 @@ public class CooldownTask extends BukkitRunnable
 	public ItemStack itemStackSpell;
 	public Main plugin;
 
+	/**@param player
+	 * Player object
+	 * @param newSlot
+	 * Slot number where used spell is
+	 * @param cooldown
+	 * Cooldown for spell
+	 * @param itemMeta
+	 * Display name of spell
+	 * @param itemStackSpell
+	 * ItemStack that cooldown item should transfer to
+	 * @param plugin
+	 * Plugin instance
+	 */
 	public CooldownTask(Player player, int newSlot, long cooldown, String itemMeta, ItemStack itemStackSpell, Main plugin) 
 	{
 		this.player = player;

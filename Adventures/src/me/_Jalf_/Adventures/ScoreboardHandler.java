@@ -21,6 +21,11 @@ public class ScoreboardHandler
 	
 	private static Map<String, Scoreboard> playerScoreboards = new HashMap<String, Scoreboard>();
 
+	/**@param player
+	 * Player display name
+	 * @param resourceName
+	 * Players resource name
+	 */
 	public static void registerBoard(String player, String resourceName)
 	{
 		Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
@@ -37,11 +42,25 @@ public class ScoreboardHandler
 		Bukkit.getPlayer(player).setScoreboard(scoreboard);
 	}
 	
+	/**@param player
+	 * Player display name
+	 */
 	public static void unregister(String player) 
 	{
 		playerScoreboards.remove(player);
 	}
 	
+	/**@param player
+	 * Player display name
+	 * @param slot
+	 * Scoreboard display slot DisplaySlot.(BELOW_NAME, PLAYER_LIST, SIDEBAR)
+	 * @param scoreName
+	 * Name of score
+	 * @param value
+	 * New scoreboard value
+	 * @param resourceName
+	 * Players resource name
+	 */
 	public static void changeBoardValue(String player, DisplaySlot slot, OfflinePlayer scoreName, int value, String resourceName)
 	{
 		if(playerScoreboards.containsKey(player)) 
@@ -52,6 +71,14 @@ public class ScoreboardHandler
 		}
 	}
 	
+	/**@param player
+	 * Player display name
+	 * @param slot
+	 * Scoreboard display slot DisplaySlot.(BELOW_NAME, PLAYER_LIST, SIDEBAR)
+	 * @param scoreName
+	 * Name of score
+	 * @return Value of score
+	 */
 	public static int getScore (String player, DisplaySlot slot, OfflinePlayer scoreName)
 	{
 		int resourceNow = playerScoreboards.get(player).getObjective(slot).getScore(scoreName).getScore();

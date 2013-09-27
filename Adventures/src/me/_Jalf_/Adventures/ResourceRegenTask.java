@@ -1,11 +1,9 @@
 package me._Jalf_.Adventures;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -24,6 +22,7 @@ public class ResourceRegenTask extends BukkitRunnable
 	@Override
 	public void run() 
 	{
+		// Check if player isn't not playerNoResource list
 		if (!PlayerResource.playerNoResource.contains(player.getName()))
 		{
 			String resourceName = Methods.getPlayerResourceName(player.getName());
@@ -36,11 +35,12 @@ public class ResourceRegenTask extends BukkitRunnable
 			{
 				resourceNow = ymlResourceNow;
 				plugin.getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", 0);
-				plugin.getSaves();
+				plugin.saveSaves();
 			}
 			
 			int resourceMax = plugin.getSaves().getInt(player.getName() + ".Resource." + resourceName + ".Max");
 
+			// Switch case to choose what resource is needed to regenerate
 			switch (resourceName)
 			{
 			case "Mana":
@@ -72,23 +72,6 @@ public class ResourceRegenTask extends BukkitRunnable
 				{							
 					if (entity instanceof LivingEntity)
 					{
-						List<EntityType> entityTypes = new ArrayList<EntityType>();
-
-						entityTypes.add(EntityType.BLAZE);
-						entityTypes.add(EntityType.CAVE_SPIDER);
-						entityTypes.add(EntityType.CREEPER);
-						entityTypes.add(EntityType.ENDERMAN);
-						entityTypes.add(EntityType.GHAST);
-						entityTypes.add(EntityType.GIANT);
-						entityTypes.add(EntityType.MAGMA_CUBE);
-						entityTypes.add(EntityType.PIG_ZOMBIE);
-						entityTypes.add(EntityType.SKELETON);
-						entityTypes.add(EntityType.SLIME);
-						entityTypes.add(EntityType.SPIDER);
-						entityTypes.add(EntityType.WITCH);
-						entityTypes.add(EntityType.WITHER);
-						entityTypes.add(EntityType.ZOMBIE);
-
 						if (entity instanceof Player)
 						{
 							/////////////////////////// if nearbyEntity is on team scoreboard then no regen
@@ -107,7 +90,7 @@ public class ResourceRegenTask extends BukkitRunnable
 								}
 							}
 						}
-						else if (entityTypes.contains(entity.getType()))
+						else if (Methods.hostileMobs().contains(entity.getType()))
 						{
 							if (resourceNow != resourceMax)
 							{

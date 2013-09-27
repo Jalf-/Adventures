@@ -38,15 +38,19 @@ public class PlayerResource implements Listener
 	{
 		final Player player = event.getPlayer();
 
+		// Starts player resource regeneration
 		plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable()
 		{
 			@Override
 			public void run() 
 			{
+				// Check if player has joined before
 				if (plugin.getSaves().isSet(player.getName() + ".Class"))
 				{
+					// Check if players class is valid
 					if (plugin.getClasses().contains(plugin.getSaves().getString(player.getName() + ".Class")))
 					{
+						// Check if player isn't Default
 						if (!plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
 						{
 							String resourceName = Methods.getPlayerResourceName(player.getName());
@@ -63,6 +67,8 @@ public class PlayerResource implements Listener
 	public void savePlayerResource(PlayerQuitEvent event)
 	{
 		Player player = event.getPlayer();
+		
+		// Checks if player isn't Default class and then saves current resource to saves.yml
 		if (!plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
 		{
 			String resourceName = Methods.getPlayerResourceName(player.getName());      
@@ -82,6 +88,7 @@ public class PlayerResource implements Listener
 		Entity damager = event.getDamager();
 		Entity entity = event.getEntity();
 
+		// Fury Regeneration on hit by another entity
 		if (entity instanceof Player)
 		{
 			Player player = ((Player) entity).getPlayer();
@@ -105,6 +112,8 @@ public class PlayerResource implements Listener
 				}
 			}
 		}
+		
+		// Fury Regeneration on hitting another entity
 		if (damager instanceof Player)
 		{
 			Player player = ((Player) damager).getPlayer();

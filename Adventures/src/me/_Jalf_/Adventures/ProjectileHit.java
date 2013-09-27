@@ -62,7 +62,7 @@ public class ProjectileHit implements Listener
 				if (slow != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(200, slow));
 				if (weakness != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.WEAKNESS.createEffect(200, weakness));
 				if (blindness != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(100 * blindness, 5));
-				if (confusion != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.CONFUSION.createEffect(200, confusion));
+				if (confusion != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.CONFUSION.createEffect(200 * confusion, 5));
 				if (hunger != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.HUNGER.createEffect(200, hunger));
 				if (poison != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.POISON.createEffect(poison*4*20, 2));
 				if (wither != 0) ((LivingEntity) entity).addPotionEffect(PotionEffectType.WITHER.createEffect(200, wither));
@@ -72,7 +72,9 @@ public class ProjectileHit implements Listener
 		}
 	}
 	@EventHandler
-	 public void noFireballFire(BlockIgniteEvent event){
+	 public void noFireballFire(BlockIgniteEvent event)
+	{
+		// Cancel a fireball from setting fire to a block on impact
 	    if(event.getCause().equals(IgniteCause.FIREBALL)) event.setCancelled(true); 
 	}
 	@EventHandler
@@ -80,6 +82,7 @@ public class ProjectileHit implements Listener
 	{
 		Entity entity = event.getEntity();
 		
+		// Removes projectile if it's equal to arrow
 		if (entity instanceof Arrow) entity.remove();
 	}
 }

@@ -25,11 +25,12 @@ public class CommandHandler implements CommandExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) 
 	{
-		String notPM = "This command can only be used by a player!";
-		if (cmd.getName().equalsIgnoreCase("adventures"))
+		if (cmd.getName().equalsIgnoreCase("adventures") || cmd.getName().equalsIgnoreCase("a"))
 		{
 			if (args.length == 0) return false;
 
+			String notPM = "This command can only be used by a player!";
+			
 			String configName = "config.yml";
 			String spellsName = "spells.yml";
 			String savesName = "saves.yml";
@@ -41,6 +42,7 @@ public class CommandHandler implements CommandExecutor
 			String pointsSelfUsage = "/adventures points <spellName> <attribute>";
 			String resourceUsage = "/adventures resource <playerName> <resourceName> <Max, Now> <add, sub, set> <numberValue>";
 			String spellUsage = "/adventures spell <stuck, spellName>";
+			// "/adventures spell unstuck"
 			String spellChangeUsage = "/adventures spell <get, replace, remove> <spellName> <(spellName)>";		
 			String reloadUsage = "/adventures reload <config, spells, saves>";
 			String classUsage = "/adventures class set <playerName> <className>";
@@ -51,6 +53,7 @@ public class CommandHandler implements CommandExecutor
 			{
 				if (args[0].equalsIgnoreCase("resource")) sender.sendMessage(resourceUsage);
 				
+				// Print players class
 				else if (args[0].equalsIgnoreCase("class"))
 				{
 					if (sender instanceof Player)
@@ -73,15 +76,13 @@ public class CommandHandler implements CommandExecutor
 					sender.sendMessage(classUsage);
 				}
 				
+				// Print how many points player have in each spell 
 				else if (args[0].equalsIgnoreCase("points")) 
 				{
 					if (sender instanceof Player)
 					{
 						Player player = (Player) sender;
-						
-						Set<String> playerSpells = plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false);
-						
-						for (String spell : playerSpells)
+						for (String spell : plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
 						{
 							int points = plugin.getSaves().getInt(player.getName() + ".Spells." + spell + ".Points");
 							int pointsUsed = plugin.getSaves().getInt(player.getName() + ".Spells." + spell + ".PointsUsed");
@@ -92,13 +93,15 @@ public class CommandHandler implements CommandExecutor
 							}
 							else if (points > pointsUsed)
 							{
-								player.sendMessage("You have " + (points - pointsUsed) + " available for " + spell);
+								player.sendMessage("You have " + (points - pointsUsed) + " available points for " + spell);
 							}
 						}
 					}
 					sender.sendMessage(pointsUsage);
 					sender.sendMessage(pointsSelfUsage);
 				}
+				
+				// Change players casting type to the opposite of what it is
 				else if (args[0].equalsIgnoreCase("castingType"))
 				{
 					if (sender instanceof Player)
@@ -125,6 +128,8 @@ public class CommandHandler implements CommandExecutor
 						sender.sendMessage(notPM);
 					} 					
 				}
+				
+				// Reload all files in datafolder
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
 					plugin.reloadConfig();
@@ -135,12 +140,10 @@ public class CommandHandler implements CommandExecutor
 					sender.sendMessage(configName + ", " + spellsName + ", " + savesName + ", " + classesName + ", " + 
 							spellPointsName + " has been reloaded!");
 				}
+				
+				// Print spell in hands description or print all player spells
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
-					
-					
-					
-					
 					if (sender instanceof Player)
 					{
 						Player player = (Player) sender;
@@ -151,7 +154,7 @@ public class CommandHandler implements CommandExecutor
 							ItemStack item = player.getItemInHand();
 							if (item != null)
 							{
-								if (item.hasItemMeta())
+								if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
 								{
 									Set<String> spells = plugin.getSpells().getKeys(false);								
 									if (spells.contains(item.getItemMeta().getDisplayName()))
@@ -205,15 +208,16 @@ public class CommandHandler implements CommandExecutor
 				
 				else if (args[0].equalsIgnoreCase("class")) sender.sendMessage(classUsage);
 				
+				// Print description and point stats for spell in args[1]
 				else if (args[0].equalsIgnoreCase("points"))
 				{
 					String spell = args[1].replace("_", " ");
 					
 					if (plugin.getSpells().contains(spell))
-					{
-						Set<String> attributes = plugin.getSpellPoints().getConfigurationSection(spell).getKeys(false);
+					{	
+						sender.sendMessage(spell + ": " + plugin.getSpells().getString(spell + ".Description"));
 						sender.sendMessage("Attributes | Base    | Increase per Point");
-						for (String attribute : attributes)
+						for (String attribute : plugin.getSpellPoints().getConfigurationSection(spell).getKeys(false))
 						{
 							String attributePoint;
 							if (plugin.getSpellPoints().get(spell + "." + attribute).equals("0")) 
@@ -260,6 +264,8 @@ public class CommandHandler implements CommandExecutor
 						sender.sendMessage(pointsUsage);
 					}
 				} 
+				
+				// Reload specified data file 
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
 					if (args[1].equalsIgnoreCase("config"))
@@ -289,20 +295,20 @@ public class CommandHandler implements CommandExecutor
 					}
 					else sender.sendMessage(reloadUsage);
 				}
+				
+				
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
+					// Check for items in inventory for the name 'Cooldown' and restart the cooldown if it's stuck
 					if (args[1].equalsIgnoreCase("stuck"))
 					{
 						if (sender instanceof Player)
 						{
 							final Player player = (Player) sender;
-							Set<String> playerSpells = plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false);
 
-							for (final String spell : playerSpells)
+							for (final String spell : plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
 							{
-								ItemStack[] items = player.getInventory().getContents();
-
-								for (final ItemStack item : items)
+								for (final ItemStack item : player.getInventory().getContents())
 								{
 									if (item != null)
 									{
@@ -338,6 +344,47 @@ public class CommandHandler implements CommandExecutor
 						}
 						else sender.sendMessage(notPM);
 					}
+					
+					// ADMIN Check for items in inventory for the name 'Cooldown' and restart the cooldown if it's stuck 
+					else if (args[1].equalsIgnoreCase("unstuck"))
+					{
+						if (sender instanceof Player)
+						{
+							final Player player = (Player) sender;
+
+							for (final String spell : plugin.getSaves().getConfigurationSection(player.getName() + ".Spells").getKeys(false))
+							{
+								for (final ItemStack item : player.getInventory().getContents())
+								{
+									if (item != null)
+									{
+										if (item.hasItemMeta())
+										{
+											if (item.getItemMeta().getDisplayName().equalsIgnoreCase("Cooldown") && item.getItemMeta().hasLore())
+											{
+												if (item.getItemMeta().getLore().get(0).replace(" is on cooldown!", "").equalsIgnoreCase(spell))
+												{
+													sender.sendMessage(spell + " is now unstuck and is on cooldown!");
+
+													ItemStack spellItem = Methods.spell(player.getName() + ".Spells." + spell, spell);
+													item.setType(spellItem.getType());
+													if (plugin.getSpells().getInt(spell + ".PlaceHolderDamage") == 0)
+													{		
+														item.setDurability((short) 0);
+													}
+													item.setData(spellItem.getData());
+													item.setItemMeta(spellItem.getItemMeta());														
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						else sender.sendMessage(notPM);
+					}
+					
+					// Print description of spell in args[1] and print if player have target spell
 					else if (plugin.getSpells().isSet(args[1].replace("_", " ")))
 					{
 						String spell = args[1].replace("_", " ");
@@ -368,6 +415,7 @@ public class CommandHandler implements CommandExecutor
 				
 				else if (args[0].equalsIgnoreCase("class")) sender.sendMessage(classUsage);
 
+				// Set attribute(args[2]) for spell(args[1]) for player 
 				else if (args[0].equalsIgnoreCase("points"))
 				{
 					if (sender instanceof Player)
@@ -427,6 +475,7 @@ public class CommandHandler implements CommandExecutor
 				}
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
+					// Give spell in players inventory if player have spell
 					if (args[1].equalsIgnoreCase("get"))
 					{
 						if (sender instanceof Player)
@@ -552,6 +601,8 @@ public class CommandHandler implements CommandExecutor
 						}
 						else sender.sendMessage(notPM);
 					}
+					
+					// Remove spell in players inventory if player have spell
 					else if (args[1].equalsIgnoreCase("remove"))
 					{
 						if (sender instanceof Player)
@@ -589,6 +640,7 @@ public class CommandHandler implements CommandExecutor
 				
 				else if (args[0].equalsIgnoreCase("resource")) sender.sendMessage(resourceUsage);
 				
+				// Set the class of a player
 				else if (args[0].equalsIgnoreCase("class"))
 				{
 					if (args[1].equalsIgnoreCase("set"))
@@ -657,6 +709,7 @@ public class CommandHandler implements CommandExecutor
 				}
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
+					// Replace spell in players inventory with another one from players spell repository
 					if (args[1].equalsIgnoreCase("replace"))
 					{
 						if (sender instanceof Player)
@@ -759,6 +812,7 @@ public class CommandHandler implements CommandExecutor
 				
 				else if (args[0].equalsIgnoreCase("resource")) sender.sendMessage(resourceUsage);
 				
+				// Checking command writer made mistake then printing message
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
 					if (args[1].equalsIgnoreCase("get"))
@@ -782,7 +836,8 @@ public class CommandHandler implements CommandExecutor
 				}
 			}
 			else if (args.length == 6)
-			{				
+			{			
+				// ADMIN Set attribute(args[3]) for spell(args[2]) for player 
 				if (args[0].equalsIgnoreCase("points"))
 				{
 					String player = args[1];
@@ -815,6 +870,8 @@ public class CommandHandler implements CommandExecutor
 					}
 					else sender.sendMessage("Target player don't have that spell in the save file!");
 				}
+				
+				// ADMIN add, sub and sets players resource
 				else if (args[0].equalsIgnoreCase("resource"))
 				{
 					String player = args[1];
@@ -851,8 +908,9 @@ public class CommandHandler implements CommandExecutor
 									ScoreboardHandler.unregister(player);
 									ScoreboardHandler.registerBoard(player, resourceName);
 
-									plugin.getServer().getScheduler().runTaskTimer(plugin, 
-											new ResourceRegenTask(Bukkit.getPlayer(player), plugin), 0, 20);
+									// Maybe Bug?
+									//plugin.getServer().getScheduler().runTaskTimer(plugin, 
+									//		new ResourceRegenTask(Bukkit.getPlayer(player), plugin), 0, 20);
 									
 									plugin.saveSaves();
 								}
@@ -863,6 +921,8 @@ public class CommandHandler implements CommandExecutor
 					}
 					else sender.sendMessage("Target player don't have that resource in the save file!");
 				}
+				
+				// Checking command writer made mistake then printing message
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
 					if (args[1].equalsIgnoreCase("get"))
