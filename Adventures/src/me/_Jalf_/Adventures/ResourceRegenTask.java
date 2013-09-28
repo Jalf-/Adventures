@@ -25,58 +25,76 @@ public class ResourceRegenTask extends BukkitRunnable
 		// Check if player isn't not playerNoResource list
 		if (!PlayerResource.playerNoResource.contains(player.getName()))
 		{
-			String resourceName = Methods.getPlayerResourceName(player.getName());
-			
-			int ymlResourceNow = plugin.getSaves().getInt(player.getName() + ".Resource." + resourceName + ".Now");
-			
-			int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName));
-			
-			if (ymlResourceNow > 0)
+			if (!plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Default"))
 			{
-				resourceNow = ymlResourceNow;
-				plugin.getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", 0);
-				plugin.saveSaves();
-			}
-			
-			int resourceMax = plugin.getSaves().getInt(player.getName() + ".Resource." + resourceName + ".Max");
+				String resourceName = Methods.getPlayerResourceName(player.getName());
 
-			// Switch case to choose what resource is needed to regenerate
-			switch (resourceName)
-			{
-			case "Mana":
-				if (resourceNow != resourceMax)
+				int ymlResourceNow = plugin.getSaves().getInt(player.getName() + ".Resource." + resourceName + ".Now");
+
+				int resourceNow = 0;
+
+				resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName));
+
+				if (ymlResourceNow > 0)
 				{
-					resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
-
-					if (resourceNow > resourceMax)
-					{
-						resourceNow = resourceMax;
-					}
+					resourceNow = ymlResourceNow;
+					plugin.getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", 0);
+					plugin.saveSaves();
 				}
-				break;
-				
-			case "Power":
-				List<Entity> nearbyEntities = player.getNearbyEntities(15, 15, 15);
 
-				if (nearbyEntities.isEmpty())
+				int resourceMax = plugin.getSaves().getInt(player.getName() + ".Resource." + resourceName + ".Max");
+
+				// Switch case to choose what resource is needed to regenerate
+				switch (resourceName)
 				{
-					resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
-					if (resourceNow < 0)
+				case "Mana":
+					if (resourceNow != resourceMax)
 					{
-						resourceNow = 0;
+						resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
+
+						if (resourceNow > resourceMax)
+						{
+							resourceNow = resourceMax;
+						}
 					}
 					break;
-				}
 
-				for (Entity entity : nearbyEntities)
-				{							
-					if (entity instanceof LivingEntity)
+				case "Power":
+					List<Entity> nearbyEntities = player.getNearbyEntities(15, 15, 15);
+
+					if (nearbyEntities.isEmpty())
 					{
-						if (entity instanceof Player)
+						resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
+						if (resourceNow < 0)
 						{
-							/////////////////////////// if nearbyEntity is on team scoreboard then no regen
-							Player selfPlayer = ((Player) entity).getPlayer();
-							if (selfPlayer == player)
+							resourceNow = 0;
+						}
+						break;
+					}
+
+					for (Entity entity : nearbyEntities)
+					{							
+						if (entity instanceof LivingEntity)
+						{
+							if (entity instanceof Player)
+							{
+								/////////////////////////// if nearbyEntity is on team scoreboard then no regen
+								Player selfPlayer = ((Player) entity).getPlayer();
+								if (selfPlayer == player)
+								{
+									if (resourceNow != resourceMax)
+									{
+										resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
+
+										if (resourceNow > resourceMax)
+										{
+											resourceNow = resourceMax;
+										}
+										break;
+									}
+								}
+							}
+							else if (Methods.hostileMobs().contains(entity.getType()))
 							{
 								if (resourceNow != resourceMax)
 								{
@@ -89,21 +107,17 @@ public class ResourceRegenTask extends BukkitRunnable
 									break;
 								}
 							}
-						}
-						else if (Methods.hostileMobs().contains(entity.getType()))
-						{
-							if (resourceNow != resourceMax)
+							else 
 							{
-								resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
-
-								if (resourceNow > resourceMax)
+								resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
+								if (resourceNow < 0)
 								{
-									resourceNow = resourceMax;
+									resourceNow = 0;
 								}
 								break;
 							}
 						}
-						else 
+						else
 						{
 							resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
 							if (resourceNow < 0)
@@ -113,6 +127,29 @@ public class ResourceRegenTask extends BukkitRunnable
 							break;
 						}
 					}
+					break;
+
+				case "Fury":
+					resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
+					if (resourceNow < 0)
+					{
+						resourceNow = 0;
+					}
+					break;
+
+				case "Concentration":
+					if (player.isSneaking())
+					{
+						if (resourceNow != resourceMax)
+						{
+							resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
+
+							if (resourceNow > resourceMax)
+							{
+								resourceNow = resourceMax;
+							}
+						}
+					}
 					else
 					{
 						resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
@@ -120,22 +157,10 @@ public class ResourceRegenTask extends BukkitRunnable
 						{
 							resourceNow = 0;
 						}
-						break;
 					}
-				}
-				break;
-				
-			case "Fury":
-				resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
-				if (resourceNow < 0)
-				{
-					resourceNow = 0;
-				}
-				break;
-				
-			case "Concentration":
-				if (player.isSneaking())
-				{
+					break;
+
+				case "Energy":
 					if (resourceNow != resourceMax)
 					{
 						resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
@@ -144,32 +169,12 @@ public class ResourceRegenTask extends BukkitRunnable
 						{
 							resourceNow = resourceMax;
 						}
-					}
-				}
-				else
-				{
-					resourceNow = resourceNow - plugin.getConfig().getInt("Resource." + resourceName + ".Degen");
-					if (resourceNow < 0)
-					{
-						resourceNow = 0;
-					}
-				}
-				break;
-				
-			case "Energy":
-				if (resourceNow != resourceMax)
-				{
-					resourceNow = resourceNow + plugin.getConfig().getInt("Resource." + resourceName + ".Regen");
 
-					if (resourceNow > resourceMax)
-					{
-						resourceNow = resourceMax;
 					}
-
+					break;
 				}
-				break;
+				ScoreboardHandler.changeBoardValue(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName), resourceNow, resourceName);
 			}
-			ScoreboardHandler.changeBoardValue(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName), resourceNow, resourceName);
 		}
 		else 
 		{

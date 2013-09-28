@@ -11,6 +11,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 public class Methods 
@@ -420,17 +422,7 @@ public class Methods
 			return false;
 		}
 	}
-	
-	public static List<String> getPartyMembers(String name)
-	{
-		List<String> members = new ArrayList<>();
-		
-		members.add("Dude");
-		members.add("Oi");
-		members.add("Bot");
-		
-		return members;
-	}
+
 	/**@return List of hostile mobs
 	 */
 	public static List<EntityType> hostileMobs()
@@ -453,5 +445,29 @@ public class Methods
 		entityTypes.add(EntityType.ZOMBIE);
 		
 		return entityTypes;
+	}
+	
+	/**@param player
+	 * Player bbject
+	 * @param key
+	 * Metadata string wanted to be checked
+	 * @param plugin
+	 * Plugin instance
+	 * @return Value of metadata string if it exists else it will return empty space
+	 */
+	public static Object getMetadata(Player player, String key, Plugin plugin)
+	{
+		if (player.hasMetadata(key))
+		{
+			List<MetadataValue> values = player.getMetadata(key);  
+			for(MetadataValue value : values)
+			{
+				if(value.getOwningPlugin().getDescription().getName().equals(plugin.getDescription().getName()))
+				{
+					return value.value();
+				}
+			}
+		}
+		return "";
 	}
 }

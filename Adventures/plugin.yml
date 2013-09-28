@@ -7,6 +7,7 @@ author: _Jalf_
 commands:
     adventures:
         description: This is the Adventures command.
+        aliases: a
         usage: |
             /adventures points
             /adventures resource
@@ -14,3 +15,4 @@ commands:
             /adventures castingtype
             /adventures reload
             /adventures class
+            /adventures party

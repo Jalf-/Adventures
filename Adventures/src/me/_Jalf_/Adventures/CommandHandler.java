@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class CommandHandler implements CommandExecutor
@@ -42,13 +43,14 @@ public class CommandHandler implements CommandExecutor
 			String pointsSelfUsage = "/adventures points <spellName> <attribute>";
 			String resourceUsage = "/adventures resource <playerName> <resourceName> <Max, Now> <add, sub, set> <numberValue>";
 			String spellUsage = "/adventures spell <stuck, spellName>";
-			// "/adventures spell unstuck"
+			//                  "/adventures spell unstuck"
 			String spellChangeUsage = "/adventures spell <get, replace, remove> <spellName> <(spellName)>";		
 			String reloadUsage = "/adventures reload <config, spells, saves>";
 			String classUsage = "/adventures class set <playerName> <className>";
 			
-//			String partyUsage = "/adventures party ";
-			
+			String partyUsage = "/adventures party <create, leave, chat>";
+			String partyManageUsage = "/adventures party <invite, join> <playerName>";
+
 			if (args.length == 1)
 			{
 				if (args[0].equalsIgnoreCase("resource")) sender.sendMessage(resourceUsage);
@@ -199,6 +201,43 @@ public class CommandHandler implements CommandExecutor
 						sender.sendMessage(notPM);
 						sender.sendMessage(spellUsage);
 						sender.sendMessage(spellChangeUsage);
+					}
+				}
+				
+				else if (args[0].equalsIgnoreCase("party"))
+				{
+					// Check if sender is a player
+					if (sender instanceof Player)
+					{
+						Player player = (Player) sender;
+						// Check if player is in a party
+						if (player.hasMetadata("PartyLeader"))
+						{
+							sender.sendMessage("----------Party----------");
+							// Check if player is the party leader
+							if (PartyHandler.getPartyLeader(player.getName()).equals(player.getName())) sender.sendMessage("You are the party leader!");
+							else sender.sendMessage(PartyHandler.getPartyLeader(player.getName()) + " is the party leader!");
+							
+							// Print members
+							for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+							{
+								sender.sendMessage(member + " is part of the party.");
+							}
+							sender.sendMessage(partyUsage);
+							sender.sendMessage(partyManageUsage);
+						}
+						else 
+						{
+							sender.sendMessage("You are not in a party!");
+							sender.sendMessage(partyUsage);
+							sender.sendMessage(partyManageUsage);
+						}
+					}
+					else 
+					{
+						sender.sendMessage(notPM);
+						sender.sendMessage(partyUsage);
+						sender.sendMessage(partyManageUsage);
 					}
 				}
 			}
@@ -407,6 +446,148 @@ public class CommandHandler implements CommandExecutor
 						sender.sendMessage(spellUsage);
 						sender.sendMessage(spellChangeUsage);
 					}
+				}
+				
+				else if (args[0].equalsIgnoreCase("party"))
+				{
+					if (sender instanceof Player)
+					{
+						Player player = (Player) sender;
+						if (args[1].equalsIgnoreCase("create"))
+						{
+							// Check if party exists
+							if (PartyHandler.getPartyLeader(player.getName()).isEmpty())
+							{
+								sender.sendMessage("You have created you own party!");
+								player.setMetadata("PartyLeader", new FixedMetadataValue(plugin, player.getName()));
+							}
+							else sender.sendMessage("You are already in a party with " + PartyHandler.getPartyLeader(player.getName()));
+						}
+						else if (args[1].equalsIgnoreCase("leave"))
+						{
+							// Check if party exists
+							if (!PartyHandler.getPartyLeader(player.getName()).isEmpty())
+							{
+								sender.sendMessage("You have left the party!");
+								player.removeMetadata("PartyChat", plugin);
+								// Check for party size
+								if (PartyHandler.getPartyMembers(player, "PartyMembers", plugin).size() != 2)
+								{
+									// Check if quitting player is party leader
+									if (player.getName().equals(PartyHandler.getPartyLeader(player.getName())))
+									{
+										if (player.hasMetadata("PartyMembers"))
+										{
+											List<String> members = new ArrayList<>();
+
+											for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+											{
+												if (!member.equals(player.getName())) members.add(member);
+											}
+
+											// Select new leader
+											Player newLeader = plugin.getServer().getPlayerExact(PartyHandler.getPartyMembers(player, 
+													"PartyMembers", plugin).get(0).toString());
+											if (newLeader.equals(player))
+											{
+												newLeader = plugin.getServer().getPlayerExact(PartyHandler.getPartyMembers(player, "PartyMembers", plugin).get(1).toString());
+											}
+
+											// Setting up new party
+											for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+											{
+												PartyHandler.removeParty(member);
+												if (!member.equals(player.getName()))
+												{
+													plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left the party!");
+
+													plugin.getServer().getPlayerExact(member).setMetadata("PartyLeader", new FixedMetadataValue(plugin, newLeader));
+													plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
+															new FixedMetadataValue(plugin, members.remove(member)));
+
+													if (newLeader.getName().equals(member))
+													{
+														plugin.getServer().getPlayerExact(member).sendMessage("You are now the new leader for this party!");
+													}
+													else plugin.getServer().getPlayerExact(member).sendMessage(newLeader + " is now the new leader for this party!");
+												}
+											}
+										}
+										else
+										{
+											player.removeMetadata("PartyLeader", plugin);
+										}
+									}
+									else
+									{
+										List<String> members = new ArrayList<>();
+										
+										for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+										{
+											if (!member.equals(player.getName())) members.add(member);
+										}			
+										for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+										{
+											plugin.getServer().getPlayerExact(member).removeMetadata("PartyMembers", plugin);
+											if (!member.equals(player.getName()))
+											{
+												plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left the party!");
+												
+												plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
+														new FixedMetadataValue(plugin, members.remove(member)));
+											}
+										}
+										PartyHandler.removeParty(player.getName());
+									}
+								}
+								else
+								{
+									for (String playerName : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+									{
+										PartyHandler.removeParty(playerName);
+										plugin.getServer().getPlayerExact(playerName).sendMessage("Everyone left your party!");
+									}
+								}
+							}
+							else sender.sendMessage("You are not in a party!");
+						}
+						else if (args[1].equalsIgnoreCase("chat"))
+						{
+							// Check if player is in party
+							if (player.hasMetadata("PartyLeader"))
+							{
+								// Check if player has used this command before
+								if (player.hasMetadata("PartyChat"))
+								{
+									// Check for value of the metadata
+									if (player.getMetadata("PartyChat").get(0).value().toString().equalsIgnoreCase("true"))
+									{
+										player.removeMetadata("PartyChat", plugin);
+										player.setMetadata("PartyChat", new FixedMetadataValue(plugin, "false"));
+										player.sendMessage("You have now taken party chat off.");
+									}
+									else if (player.getMetadata("PartyChat").get(0).value().toString().equalsIgnoreCase("false"))
+									{
+										player.removeMetadata("PartyChat", plugin);
+										player.setMetadata("PartyChat", new FixedMetadataValue(plugin, "true"));
+										player.sendMessage("You have now taken party chat on.");
+									}
+								}
+								else
+								{
+									player.setMetadata("PartyChat", new FixedMetadataValue(plugin, "true"));
+									player.sendMessage("You have now taken party chat on.");
+								}
+							}
+							else sender.sendMessage("You are not in a party!");
+						}
+						else 
+						{
+							sender.sendMessage(partyUsage);
+							sender.sendMessage(partyManageUsage);
+						}
+					}
+					else sender.sendMessage(notPM);
 				}
 			}
 			else if (args.length == 3)
@@ -633,6 +814,97 @@ public class CommandHandler implements CommandExecutor
 						else sender.sendMessage(notPM);
 					}
 				}
+
+				else if (args[0].equalsIgnoreCase("party"))
+				{
+					if (sender instanceof Player)
+					{
+						Player player = (Player) sender;
+						String otherPlayer = args[2];
+
+						// Check if other player is online
+						if (plugin.getServer().getPlayerExact(otherPlayer) != null && !otherPlayer.equals(player.getName()))
+						{
+							if (args[1].equalsIgnoreCase("invite"))
+							{
+								// Check if player has rights to invite
+								if (player.hasMetadata("PartyLeader") && player.getMetadata("PartyLeader").equals(player.getName()))
+								{
+									// Check if other player is in a party
+									if (!plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyLeader"))
+									{
+										if (PartyHandler.partyInviteMap.containsKey(otherPlayer))
+										{
+											PartyHandler.partyInviteMap.remove(otherPlayer);
+											PartyHandler.partyInviteMap.put(otherPlayer, player.getName());
+										}
+										else PartyHandler.partyInviteMap.put(otherPlayer, player.getName());
+									}
+									else sender.sendMessage(otherPlayer + " is already in a party!");
+								}
+								else sender.sendMessage("You are not party leader!");
+							}
+							else if (args[1].equalsIgnoreCase("join"))
+							{
+								// Check if player is not in a party
+								if (!player.hasMetadata("PartyLeader"))
+								{
+									// Check if other player is a party leader
+									if (plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyLeader") && 
+											plugin.getServer().getPlayerExact(otherPlayer).getMetadata("PartyLeader").equals(otherPlayer))
+									{
+										if (plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyMembers"))
+										{
+											// Check if party is full
+											if (PartyHandler.getPartyMembers(plugin.getServer().getPlayerExact(otherPlayer), "PartyMembers", plugin).size() < 4)
+											{
+												// Check if other player had invited player to party
+												if (PartyHandler.partyInviteMap.containsKey(otherPlayer) && 
+														PartyHandler.partyInviteMap.get(player.getName()).equals(otherPlayer))
+												{
+													PartyHandler.partyInviteMap.remove(player.getName());
+													
+													List<String> members = new ArrayList<>();
+													
+													for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+													{
+														members.add(member);
+													}
+													members.add(player.getName());
+													player.setMetadata("PartyLeader", new FixedMetadataValue(plugin, otherPlayer));
+													
+													for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+													{
+														plugin.getServer().getPlayerExact(member).removeMetadata("PartyMembers", plugin);
+														plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has joined your party!");
+
+														plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
+																new FixedMetadataValue(plugin, members));
+													}
+												}
+												else sender.sendMessage(otherPlayer + " has not invited you to his party!");
+											}
+											else sender.sendMessage(otherPlayer + "'s party is already ");
+										}
+										else System.out.println("Error in " + CommandHandler.class.getName() + " under /adventures party join!");
+									}
+									else sender.sendMessage(otherPlayer + " is not party leader!");
+								}
+								else sender.sendMessage("You are in a party!");								
+							}
+							else sender.sendMessage(partyManageUsage);
+						}
+						else 
+						{
+							if (otherPlayer.equals(player.getName()))
+							{
+								sender.sendMessage("You can not invite/join yourself! I feel sorry for you, forever alone.");
+							}
+							else sender.sendMessage(otherPlayer + " is not online!");
+						}
+					}
+					else sender.sendMessage(notPM);
+				}
 			}
 			else if (args.length == 4)
 			{
@@ -645,14 +917,14 @@ public class CommandHandler implements CommandExecutor
 				{
 					if (args[1].equalsIgnoreCase("set"))
 					{
-						if (Bukkit.getPlayer(args[2]).isOnline())
+						if (Bukkit.getPlayerExact(args[2]).isOnline())
 						{
 							final String player = args[2];
 							Set<String> classes = plugin.getClasses().getKeys(false);
 							if (classes.contains(args[3]))
 							{	
 								boolean switchClass = true;
-								if (args[3].equals("Admin") && !Bukkit.getPlayer(player).isOp()) switchClass = false;
+								if (args[3].equals("Admin") && !Bukkit.getPlayerExact(player).isOp()) switchClass = false;
 								
 								if (!plugin.getSaves().getString(player + ".Class").equals(args[3]) && switchClass == true)
 								{
@@ -670,18 +942,18 @@ public class CommandHandler implements CommandExecutor
 									plugin.getSaves().set(player + ".Resource." + 
 											plugin.getClasses().getString(args[3] + ".Resource.Resource Name") + ".Now", 0);
 									
-									Bukkit.getPlayer(player).sendMessage("You are now a " + args[3]);
+									Bukkit.getPlayerExact(player).sendMessage("You are now a " + args[3]);
 									
 									plugin.saveSaves();
 									
-									Bukkit.getPlayer(player).setLevel(1);
+									Bukkit.getPlayerExact(player).setLevel(1);
 									new BukkitRunnable() 
 									{
 										@Override
 										public void run() 
 										{
-											Bukkit.getPlayer(player).setLevel(0);
-											Bukkit.getPlayer(player).setExp(0);
+											Bukkit.getPlayerExact(player).setLevel(0);
+											Bukkit.getPlayerExact(player).setExp(0);
 										}
 									}.runTaskLater(plugin, 1);
 									

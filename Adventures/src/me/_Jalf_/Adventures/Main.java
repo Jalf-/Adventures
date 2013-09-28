@@ -24,6 +24,7 @@ public class Main extends JavaPlugin
 	{	
 		// Setting static variables to null
 		PlayerResource.playerNoResource = null;
+		PartyHandler.partyInviteMap = null;
 
 		// Sets all online players spell off cooldown and gives them the spell which was on cooldown if player have item with the name 'Cooldown'
 		// Saves all online players resource in saves.yml
@@ -95,6 +96,7 @@ public class Main extends JavaPlugin
 	    new PartyHandler(this);
 	    
 	    // Spell Register
+	    // Jalf Register
 	    new FireWall(this);
 	    new SlowAura(this);
 	    new ExplodingArrow(this);
@@ -132,6 +134,10 @@ public class Main extends JavaPlugin
 	    new StoneRing(this);
 	    new Blizzard(this);
 	    new FoulPlay(this);
+	    
+	    // EstTown Register
+	    
+	    // Xenorexian Register
 	    
 	    // End of Spell Register
 	    
@@ -301,7 +307,7 @@ public class Main extends JavaPlugin
     
     public void saveClasses() 
     {
-        if (classesConfig == null || classesConfig == null) 
+        if (classesConfig == null || classesConfigFile == null) 
         {
         	reloadClasses();
         }
