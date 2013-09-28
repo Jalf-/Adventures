@@ -24,8 +24,9 @@ public class PoisonDart
 		if (targetBlock != null)
 		{
 			Projectile arrow = player.launchProjectile(Arrow.class);
-			arrow.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			arrow.setMetadata("Poison" + strength, new FixedMetadataValue(plugin, true));
+			arrow.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			arrow.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+			arrow.setMetadata("Poison", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

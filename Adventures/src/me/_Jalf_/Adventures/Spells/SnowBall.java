@@ -24,8 +24,9 @@ public class SnowBall
 		if (targetBlock != null)
 		{
 			Projectile snowBall = player.launchProjectile(Snowball.class);
-			snowBall.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			snowBall.setMetadata("Slow" + strength, new FixedMetadataValue(plugin, true));
+			snowBall.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			snowBall.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+			snowBall.setMetadata("Slow", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

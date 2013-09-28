@@ -24,9 +24,10 @@ public class FireBall
 		if (targetBlock != null)
 		{
 			Projectile fireBall	= player.launchProjectile(LargeFireball.class);
-			fireBall.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			fireBall.setMetadata("Fire" + strength, new FixedMetadataValue(plugin, true));
-			fireBall.setMetadata("Explosive" + strength, new FixedMetadataValue(plugin, true));
+			fireBall.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			fireBall.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, damage));
+			fireBall.setMetadata("Fire", new FixedMetadataValue(plugin, strength));
+			fireBall.setMetadata("Explosive", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

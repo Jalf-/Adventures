@@ -19,7 +19,8 @@ public class BlindingArrow
 	public static void blindingArrowSpell(Player player, int damage, int strength) 
 	{
 		Projectile arrow = player.launchProjectile(Arrow.class);
-		arrow.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-		arrow.setMetadata("Blindness" + strength, new FixedMetadataValue(plugin, true));
+		arrow.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+		arrow.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+		arrow.setMetadata("Blindness", new FixedMetadataValue(plugin, strength));
 	}
 }

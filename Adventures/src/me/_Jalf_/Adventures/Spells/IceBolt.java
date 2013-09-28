@@ -24,9 +24,10 @@ public class IceBolt
 		if (targetBlock != null)
 		{
 			Projectile iceBolt = player.launchProjectile(Snowball.class);
-			iceBolt.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			iceBolt.setMetadata("Slow" + strength, new FixedMetadataValue(plugin, true));
-			iceBolt.setMetadata("Weakness" + strength, new FixedMetadataValue(plugin, true));
+			iceBolt.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			iceBolt.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+			iceBolt.setMetadata("Slow", new FixedMetadataValue(plugin, strength));
+			iceBolt.setMetadata("Weakness", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

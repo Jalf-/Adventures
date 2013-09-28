@@ -24,8 +24,9 @@ public class FireBolt
 		if (targetBlock != null)
 		{
 			Projectile fireBolt = player.launchProjectile(SmallFireball.class);
-			fireBolt.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			fireBolt.setMetadata("Fire" + strength, new FixedMetadataValue(plugin, true));
+			fireBolt.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			fireBolt.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+			fireBolt.setMetadata("Fire", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

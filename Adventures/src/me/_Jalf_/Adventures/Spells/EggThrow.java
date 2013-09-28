@@ -24,10 +24,11 @@ public class EggThrow
 		if (targetBlock != null)
 		{
 			Projectile egg = player.launchProjectile(Egg.class);
-			egg.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-			egg.setMetadata("Blindness" + strength, new FixedMetadataValue(plugin, true));
-			egg.setMetadata("Confussion" + strength, new FixedMetadataValue(plugin, true));
-			egg.setMetadata("Weakness" + strength, new FixedMetadataValue(plugin, true));
+			egg.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+			egg.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+			egg.setMetadata("Blindness", new FixedMetadataValue(plugin, strength));
+			egg.setMetadata("Confussion", new FixedMetadataValue(plugin, strength));
+			egg.setMetadata("Weakness", new FixedMetadataValue(plugin, strength));
 		}
 	}
 }

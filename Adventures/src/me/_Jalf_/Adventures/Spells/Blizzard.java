@@ -57,9 +57,14 @@ public class Blizzard
 									Entity snowBall = loc.getWorld().spawnEntity(loc, EntityType.SNOWBALL);
 									snowBall.setVelocity(new Vector(0, -0.5, 0));
 									snowBall.setMetadata("IsProjectile", new FixedMetadataValue(plugin, true));
-									snowBall.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
-									snowBall.setMetadata("Slow" + strength, new FixedMetadataValue(plugin, true));
-									snowBall.setMetadata("Blindness1", new FixedMetadataValue(plugin, true));
+//									snowBall.setMetadata("Damage" + damage, new FixedMetadataValue(plugin, true));
+//									snowBall.setMetadata("Slow" + strength, new FixedMetadataValue(plugin, true));
+//									snowBall.setMetadata("Blindness1", new FixedMetadataValue(plugin, true));
+									
+									snowBall.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+									snowBall.setMetadata("Damage", new FixedMetadataValue(plugin, damage));
+									snowBall.setMetadata("Slow", new FixedMetadataValue(plugin, strength));
+									snowBall.setMetadata("Blindness", new FixedMetadataValue(plugin, 1));
 									i--;
 								}else break;
 							}
