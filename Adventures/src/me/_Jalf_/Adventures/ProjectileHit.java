@@ -49,6 +49,7 @@ public class ProjectileHit implements Listener
 							// Check if player is in a party
 							if (PartyHandler.getPartyLeader(shooter).length() > 0)
 							{
+								System.out.println(PartyHandler.getPartyMembers(shooterPlayer, "PartyMembers", plugin));
 								// Check if entity hit is any in party
 								for (int i = 0; i < PartyHandler.getPartyMembers(shooterPlayer, "PartyMembers", plugin).size(); i++)
 								{
@@ -65,6 +66,7 @@ public class ProjectileHit implements Listener
 				
 				if (doNegativeEffect == true)
 				{
+					// Initialize effects
 					int dmg = 0;
 					int exp = 0;
 					int fire = 0;
@@ -77,6 +79,7 @@ public class ProjectileHit implements Listener
 					int poison = 0;
 					int wither = 0;
 					
+					// Setting effects
 					if (damager.hasMetadata("Damage")) dmg = damager.getMetadata("Damage").get(0).asInt();
 					if (damager.hasMetadata("Explosive")) exp = damager.getMetadata("Explosive").get(0).asInt();
 					if (damager.hasMetadata("Fire")) fire = damager.getMetadata("Fire").get(0).asInt();
@@ -88,22 +91,8 @@ public class ProjectileHit implements Listener
 					if (damager.hasMetadata("Hunger")) hunger = damager.getMetadata("Hunger").get(0).asInt();
 					if (damager.hasMetadata("Poison")) poison = damager.getMetadata("Poison").get(0).asInt();
 					if (damager.hasMetadata("Wither")) wither = damager.getMetadata("Wither").get(0).asInt();
-					
-					
-//					for (int i = 1;i < 50;i++)
-//					{
-//						if (damager.hasMetadata("Damage" + i)) dmg = i;
-//						if (damager.hasMetadata("Explosive" + i)) exp = i;
-//						if (damager.hasMetadata("Fire" + i)) fire = i;
-//						// Potion Effects
-//						if (damager.hasMetadata("Slow" + i)) slow = i;
-//						if (damager.hasMetadata("Weakness" + i)) weakness = i;
-//						if (damager.hasMetadata("Blindness" + i)) blindness = i;
-//						if (damager.hasMetadata("Confusion" + i)) confusion = i;
-//						if (damager.hasMetadata("Hunger" + i)) hunger = i;
-//						if (damager.hasMetadata("Poison" + i)) poison = i;
-//						if (damager.hasMetadata("Wither" + i)) wither = i;
-//					}
+
+					// Executing effects
 					if (dmg != 0) ((LivingEntity) entity).damage((double) dmg);
 					if (exp != 0) damager.getLocation().getWorld().createExplosion(damager.getLocation().getX(), damager.getLocation().getY(), damager.getLocation().getZ(), exp, false, false);
 					if (fire != 0) entity.setFireTicks(fire*20);
