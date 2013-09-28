@@ -34,7 +34,7 @@ public class PartyHandler implements Listener
 		if (!getPartyLeader(player.getName()).isEmpty())
 		{
 			// Check for party size
-			if (getPartyMembers(player, "PartyMembers", plugin).size() != 2)
+			if (getPartyMembers(player, "PartyMembers", plugin).size() > 2)
 			{
 				// Check if quitting player is party leader
 				if (player.getName().equals(getPartyLeader(player.getName())))
@@ -175,6 +175,7 @@ public class PartyHandler implements Listener
 	{
 		Player player = plugin.getServer().getPlayerExact(name);
 		
+		player.removeMetadata("PartyChat", plugin);
 		player.removeMetadata("PartyMembers", plugin);
 		player.removeMetadata("PartyLeader", plugin);
 	}

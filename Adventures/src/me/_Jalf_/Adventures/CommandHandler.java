@@ -460,6 +460,7 @@ public class CommandHandler implements CommandExecutor
 							{
 								sender.sendMessage("You have created you own party!");
 								player.setMetadata("PartyLeader", new FixedMetadataValue(plugin, player.getName()));
+								player.setMetadata("PartyMembers", new FixedMetadataValue(plugin, player.getName()));
 							}
 							else sender.sendMessage("You are already in a party with " + PartyHandler.getPartyLeader(player.getName()));
 						}
