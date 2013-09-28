@@ -917,63 +917,67 @@ public class CommandHandler implements CommandExecutor
 				{
 					if (args[1].equalsIgnoreCase("set"))
 					{
-						if (Bukkit.getPlayerExact(args[2]).isOnline())
+						if (Bukkit.getPlayerExact(args[2]) != null)
 						{
-							final String player = args[2];
-							Set<String> classes = plugin.getClasses().getKeys(false);
-							if (classes.contains(args[3]))
-							{	
-								boolean switchClass = true;
-								if (args[3].equals("Admin") && !Bukkit.getPlayerExact(player).isOp()) switchClass = false;
-								
-								if (!plugin.getSaves().getString(player + ".Class").equals(args[3]) && switchClass == true)
-								{
-									PlayerResource.playerNoResource.add(player);
-									
-									plugin.getSaves().set(player + ".Class", args[3]);
+							if (Bukkit.getPlayerExact(args[2]).isOnline())
+							{
+								final String player = args[2];
+								Set<String> classes = plugin.getClasses().getKeys(false);
+								if (classes.contains(args[3]))
+								{	
+									boolean switchClass = true;
+									if (args[3].equals("Admin") && !Bukkit.getPlayerExact(player).isOp()) switchClass = false;
 
-									plugin.getSaves().set(player + ".Resource", null);
-
-									plugin.getSaves().set(player + ".Resource." + 
-											plugin.getClasses().getString(args[3] + ".Resource.Resource Name") + ".Max", 
-											plugin.getClasses().getInt(args[3] + ".Resource.Resource Start") + 
-											plugin.getClasses().getInt(args[3] + ".Resource.Resource per Lvl"));
-									
-									plugin.getSaves().set(player + ".Resource." + 
-											plugin.getClasses().getString(args[3] + ".Resource.Resource Name") + ".Now", 0);
-									
-									Bukkit.getPlayerExact(player).sendMessage("You are now a " + args[3]);
-									
-									plugin.saveSaves();
-									
-									Bukkit.getPlayerExact(player).setLevel(1);
-									new BukkitRunnable() 
+									if (!plugin.getSaves().getString(player + ".Class").equals(args[3]) && switchClass == true)
 									{
-										@Override
-										public void run() 
+										PlayerResource.playerNoResource.add(player);
+
+										plugin.getSaves().set(player + ".Class", args[3]);
+
+										plugin.getSaves().set(player + ".Resource", null);
+
+										plugin.getSaves().set(player + ".Resource." + 
+												plugin.getClasses().getString(args[3] + ".Resource.Resource Name") + ".Max", 
+												plugin.getClasses().getInt(args[3] + ".Resource.Resource Start") + 
+												plugin.getClasses().getInt(args[3] + ".Resource.Resource per Lvl"));
+
+										plugin.getSaves().set(player + ".Resource." + 
+												plugin.getClasses().getString(args[3] + ".Resource.Resource Name") + ".Now", 0);
+
+										Bukkit.getPlayerExact(player).sendMessage("You are now a " + args[3]);
+
+										plugin.saveSaves();
+
+										Bukkit.getPlayerExact(player).setLevel(1);
+										new BukkitRunnable() 
 										{
-											Bukkit.getPlayerExact(player).setLevel(0);
-											Bukkit.getPlayerExact(player).setExp(0);
+											@Override
+											public void run() 
+											{
+												Bukkit.getPlayerExact(player).setLevel(0);
+												Bukkit.getPlayerExact(player).setExp(0);
+											}
+										}.runTaskLater(plugin, 1);
+
+										ScoreboardHandler.unregister(player);
+										if (!plugin.getSaves().getString(player + ".Class").equalsIgnoreCase("Default"))
+										{
+											String resourceName = Methods.getPlayerResourceName(player);
+											ScoreboardHandler.registerBoard(player, resourceName);
 										}
-									}.runTaskLater(plugin, 1);
-									
-									ScoreboardHandler.unregister(player);
-									if (!plugin.getSaves().getString(player + ".Class").equalsIgnoreCase("Default"))
+									}
+									else 
 									{
-										String resourceName = Methods.getPlayerResourceName(player);
-										ScoreboardHandler.registerBoard(player, resourceName);
+										if (switchClass == false)
+										{
+											sender.sendMessage("'Admin' is an only op class!");
+										}
+										else sender.sendMessage("Target player is already that class!");
 									}
 								}
-								else 
-								{
-									if (switchClass == false)
-									{
-										sender.sendMessage("'Admin' is an only op class!");
-									}
-									else sender.sendMessage("Target player is already that class!");
-								}
+								else sender.sendMessage("Specified class isn't in the " + classesName);
 							}
-							else sender.sendMessage("Specified class isn't in the " + classesName);
+							else sender.sendMessage("Target player must be online!");
 						}
 						else sender.sendMessage("Target player must be online!");
 					}
