@@ -4,6 +4,7 @@ import java.util.List;
 
 import me._Jalf_.Adventures.FireworkEffectPlayer;
 import me._Jalf_.Adventures.Methods;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -25,12 +26,27 @@ public class FrostBreath
 		{
 			if (e instanceof LivingEntity)
 			{
-				((LivingEntity) e).addPotionEffect(PotionEffectType.SLOW.createEffect(50*strength, strength));	
-				try {
-					FireworkEffectPlayer.playFirework(e.getLocation().getWorld(), e.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.NAVY).build());
-				} catch (Exception e1) {
-					e1.printStackTrace();
+				if (e instanceof Player)
+				{
+					if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) e)))
+					{
+						((LivingEntity) e).addPotionEffect(PotionEffectType.SLOW.createEffect(50*strength, strength));	
+						try {
+							FireworkEffectPlayer.playFirework(e.getLocation().getWorld(), e.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.NAVY).build());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
 				}
+				else
+				{
+					((LivingEntity) e).addPotionEffect(PotionEffectType.SLOW.createEffect(50*strength, strength));	
+					try {
+						FireworkEffectPlayer.playFirework(e.getLocation().getWorld(), e.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.NAVY).build());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}	
 			}
 		}
 	}

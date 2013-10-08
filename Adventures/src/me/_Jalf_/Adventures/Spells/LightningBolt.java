@@ -2,6 +2,8 @@ package me._Jalf_.Adventures.Spells;
 
 import java.util.List;
 
+import me._Jalf_.Adventures.PartyHandler;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,8 +31,19 @@ public class LightningBolt
 					{	
 						if (entity instanceof LivingEntity)
 						{
-							((LivingEntity) entity).damage(damage);
-							player.getWorld().strikeLightningEffect(entity.getLocation());
+							if (entity instanceof Player)
+							{
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+								{
+									((LivingEntity) entity).damage(damage);
+									player.getWorld().strikeLightningEffect(entity.getLocation());
+								}
+							}
+							else 
+							{
+								((LivingEntity) entity).damage(damage);
+								player.getWorld().strikeLightningEffect(entity.getLocation());
+							}
 						}
 					}
 				}				

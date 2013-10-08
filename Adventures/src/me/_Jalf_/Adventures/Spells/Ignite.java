@@ -2,6 +2,8 @@ package me._Jalf_.Adventures.Spells;
 
 import java.util.List;
 
+import me._Jalf_.Adventures.PartyHandler;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,7 +31,12 @@ public class Ignite
 					{	
 						if (entity instanceof LivingEntity)
 						{
-							if (entity.getFireTicks() < time) entity.setFireTicks(time);
+							if (entity instanceof Player)
+							{
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity))) 
+									if (entity.getFireTicks() < time) entity.setFireTicks(time);
+							}
+							else if (entity.getFireTicks() < time) entity.setFireTicks(time);
 						}
 					}
 				}				

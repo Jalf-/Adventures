@@ -3,6 +3,7 @@ package me._Jalf_.Adventures.Spells;
 import java.util.List;
 
 import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -34,22 +35,30 @@ public class SmokeScreen
 					{							
 						if (entity instanceof LivingEntity)
 						{
+							Location entityLocation = entity.getLocation();
 							if (entity instanceof Player)
 							{
-//								((Player) entity).getScoreboard().     Debuff
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(60, 5));
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+								{
+									((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(60, 5));
+									entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 0), 0.0F);
+									entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 0), 0.0F);
+									entityLocation.getWorld().createExplosion(entityLocation.add(-2, 0, 0), 0.0F);
+									entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 1), 0.0F);
+									entityLocation.getWorld().createExplosion(entityLocation.add(0, 0, -2), 0.0F);
+									entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 1), 0.0F);
+								}
 							}
 							else
 							{
 								((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(60, 5));
+								entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 0), 0.0F);
+								entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 0), 0.0F);
+								entityLocation.getWorld().createExplosion(entityLocation.add(-2, 0, 0), 0.0F);
+								entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 1), 0.0F);
+								entityLocation.getWorld().createExplosion(entityLocation.add(0, 0, -2), 0.0F);
+								entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 1), 0.0F);
 							}
-							Location entityLocation = entity.getLocation();
-							entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 0), 0.0F);
-							entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 0), 0.0F);
-							entityLocation.getWorld().createExplosion(entityLocation.add(-2, 0, 0), 0.0F);
-							entityLocation.getWorld().createExplosion(entityLocation.add(1, 0, 1), 0.0F);
-							entityLocation.getWorld().createExplosion(entityLocation.add(0, 0, -2), 0.0F);
-							entityLocation.getWorld().createExplosion(entityLocation.add(0, 1, 1), 0.0F);
 						}
 					}
 					timer = timer - 10;

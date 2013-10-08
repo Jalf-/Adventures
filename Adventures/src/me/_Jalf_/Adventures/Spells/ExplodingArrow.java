@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -28,6 +29,7 @@ public class ExplodingArrow
 		tnt.setVelocity(arrowVelocity);
 		tnt.setFuseTicks(200);
 		tnt.setYield(strength);
+		tnt.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
 
 		new BukkitRunnable() 
 		{

@@ -2,6 +2,8 @@ package me._Jalf_.Adventures.Spells;
 
 import java.util.List;
 
+import me._Jalf_.Adventures.PartyHandler;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,13 +35,10 @@ public class Starve
 						{
 							if (entity instanceof Player)
 							{
-//								((Player) entity).getScoreboard().
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.HUNGER.createEffect(time, potionStrength));
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity))) 
+									((LivingEntity) entity).addPotionEffect(PotionEffectType.HUNGER.createEffect(time, potionStrength));
 							}
-							else
-							{
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.WEAKNESS.createEffect(time, potionStrength));
-							}
+							else ((LivingEntity) entity).addPotionEffect(PotionEffectType.HUNGER.createEffect(time, potionStrength));
 						}
 					}
 				}				

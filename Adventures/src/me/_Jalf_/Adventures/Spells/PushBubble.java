@@ -2,6 +2,8 @@ package me._Jalf_.Adventures.Spells;
 
 import java.util.List;
 
+import me._Jalf_.Adventures.PartyHandler;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -20,8 +22,20 @@ public class PushBubble
 			{
 				Location entityLoc = entity.getLocation();
 				Vector entityVector = new Vector (entityLoc.getX()-playerLoc.getX(), entityLoc.getY()-playerLoc.getY(), entityLoc.getZ()-playerLoc.getZ());
-				if (entityLoc.distance(playerLoc) < radius/2) entityVector = new Vector ((entityLoc.getX()-playerLoc.getX())*2, entityLoc.getY()-playerLoc.getY(), (entityLoc.getZ()-playerLoc.getZ())*2);
-				entity.setVelocity(entityVector);
+				
+				if (entity instanceof Player)
+				{
+					if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+					{
+						if (entityLoc.distance(playerLoc) < radius/2) entityVector = new Vector ((entityLoc.getX()-playerLoc.getX())*2, entityLoc.getY()-playerLoc.getY(), (entityLoc.getZ()-playerLoc.getZ())*2);
+						entity.setVelocity(entityVector);
+					}
+				}
+				else
+				{
+					if (entityLoc.distance(playerLoc) < radius/2) entityVector = new Vector ((entityLoc.getX()-playerLoc.getX())*2, entityLoc.getY()-playerLoc.getY(), (entityLoc.getZ()-playerLoc.getZ())*2);
+					entity.setVelocity(entityVector);
+				}
 			}
 		}
 	}

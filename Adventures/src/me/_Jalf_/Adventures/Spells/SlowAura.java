@@ -3,6 +3,7 @@ package me._Jalf_.Adventures.Spells;
 import java.util.List;
 
 import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -35,13 +36,10 @@ public class SlowAura
 						{
 							if (entity instanceof Player)
 							{
-//								((Player) entity).getScoreboard().     Debuff
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(60, potionStrength));
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+									((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(60, potionStrength));
 							}
-							else
-							{
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(60, potionStrength));
-							}
+							else ((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(60, potionStrength));
 						}
 					}
 					timer = timer - 10;

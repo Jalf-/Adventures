@@ -3,6 +3,7 @@ package me._Jalf_.Adventures.Spells;
 import java.util.List;
 
 import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -55,11 +56,23 @@ public class HiddenMine
 							{	
 								if (entity instanceof LivingEntity)
 								{
-									// Check if player is in party
-									player.getWorld().createExplosion(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), strength, false, false);
-									playerLoc.getBlock().setType(Material.AIR);
-									this.cancel();
-									break;
+									if (entity instanceof Player)
+									{
+										if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+										{
+											player.getWorld().createExplosion(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), strength, false, false);
+											playerLoc.getBlock().setType(Material.AIR);
+											this.cancel();
+											break;
+										}
+									}
+									else 
+									{
+										player.getWorld().createExplosion(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), strength, false, false);
+										playerLoc.getBlock().setType(Material.AIR);
+										this.cancel();
+										break;
+									}
 								}
 							}
 						}

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -51,7 +52,16 @@ public class ChainLightning
 								{	
 									if (entity instanceof LivingEntity)
 									{
-										if (!entitiesHit.contains(entity.getUniqueId())) entitiesInside.add(entity.getLocation().distanceSquared(targetBlockLocation));
+										if (entity instanceof Player)
+										{
+											if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+											{
+												if (!entitiesHit.contains(entity.getUniqueId())) 
+													entitiesInside.add(entity.getLocation().distanceSquared(targetBlockLocation));
+											}
+										}
+										else if (!entitiesHit.contains(entity.getUniqueId())) 
+											entitiesInside.add(entity.getLocation().distanceSquared(targetBlockLocation));
 									}
 								}
 							}

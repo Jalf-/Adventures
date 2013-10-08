@@ -4,6 +4,7 @@ import java.util.List;
 
 import me._Jalf_.Adventures.Main;
 import me._Jalf_.Adventures.Methods;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -54,8 +55,19 @@ public class LightningStorm
 								{	
 									if (entity instanceof LivingEntity)
 									{
-										((LivingEntity) entity).damage(damage);
-										player.getWorld().strikeLightningEffect(entity.getLocation());
+										if (entity instanceof Player)
+										{
+											if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+											{
+												((LivingEntity) entity).damage(damage);
+												player.getWorld().strikeLightningEffect(entity.getLocation());
+											}
+										}
+										else
+										{
+											((LivingEntity) entity).damage(damage);
+											player.getWorld().strikeLightningEffect(entity.getLocation());
+										}
 									}
 								}
 							}

@@ -3,6 +3,7 @@ package me._Jalf_.Adventures.Spells;
 import java.util.List;
 
 import me._Jalf_.Adventures.Methods;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -23,7 +24,11 @@ public class Grab
 			{
 				Location entityLoc = entity.getLocation();
 				Vector entityVector = new Vector ((playerLoc.getX()-entityLoc.getX())/2, playerLoc.getY()-entityLoc.getY(), (playerLoc.getZ()-entityLoc.getZ())/2);
-				entity.setVelocity(entityVector);
+				if (entity instanceof Player)
+				{
+					if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity))) entity.setVelocity(entityVector);
+				}
+				else entity.setVelocity(entityVector);
 			}
 		}
 	}

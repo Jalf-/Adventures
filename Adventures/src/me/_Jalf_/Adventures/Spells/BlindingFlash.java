@@ -3,12 +3,14 @@ package me._Jalf_.Adventures.Spells;
 import java.util.List;
 
 import me._Jalf_.Adventures.FireworkEffectPlayer;
+import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.FireworkEffect.Type;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.FireworkEffect.Type;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -17,8 +19,15 @@ import org.bukkit.potion.PotionEffectType;
 
 public class BlindingFlash 
 {
+	public static Main plugin;
+	
+	public BlindingFlash (Main plugin)
+	{
+		BlindingFlash.plugin = plugin;
+	}
+	
 	@SuppressWarnings("deprecation")
-	public static void blindingFlashSpell(Player player, int strength, double radius, int range, int time) 
+	public static void blindingFlashSpell(Player player, double radius, int range, int time) 
 	{
 		Block targetBlock = player.getTargetBlock(null, range);
 		Location targetBlockLocation = targetBlock.getLocation();
@@ -35,18 +44,26 @@ public class BlindingFlash
 					{	
 						if (entity instanceof LivingEntity)
 						{
-							try {
-								FireworkEffectPlayer.playFirework(entity.getLocation().getWorld(), entity.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.YELLOW).build());
-							} catch (Exception e1) {
-								e1.printStackTrace();
-							}
 							if (entity instanceof Player)
 							{
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(time, strength));
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+								{
+									((LivingEntity) entity).addPotionEffect(PotionEffectType.BLINDNESS.createEffect(time, 5));
+									try {
+										FireworkEffectPlayer.playFirework(entity.getLocation().getWorld(), entity.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.YELLOW).build());
+									} catch (Exception e1) {
+										e1.printStackTrace();
+									}
+								}							
 							}
 							else
 							{
-								((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(time, strength));
+								try {
+									FireworkEffectPlayer.playFirework(entity.getLocation().getWorld(), entity.getLocation(), FireworkEffect.builder().with(Type.BURST).withColor(Color.YELLOW).build());
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+								((LivingEntity) entity).addPotionEffect(PotionEffectType.SLOW.createEffect(time, 2));
 							}
 						}
 					}

@@ -242,10 +242,10 @@ public class SpellHandler extends Main implements Listener
 					Comet.cometSpell(player, strengthValue, radiusValue, rangeValue);
 					break;
 				case "Flash":
-					Flash.flashSpell(player, strengthValue, radiusValue, timeValue);
+					Flash.flashSpell(player, radiusValue, timeValue);
 					break;
 				case "Arrow Line":
-					ArrowLine.arrowLineSpell(player, strengthValue, countValue);
+					ArrowLine.arrowLineSpell(player, countValue);
 					break;
 				case "Hidden Mine":
 					HiddenMine.hiddenMineSpell(player, timeValue, radiusValue, strengthValue, delayValue);
@@ -323,7 +323,7 @@ public class SpellHandler extends Main implements Listener
 					Terrify.terrifySpell(player, timeValue, rangeValue, radiusValue, strengthValue);
 					break;
 				case "Blinding Flash":
-					BlindingFlash.blindingFlashSpell(player, strengthValue, radiusValue, rangeValue, timeValue);
+					BlindingFlash.blindingFlashSpell(player, radiusValue, rangeValue, timeValue);
 					break;
 				case "Blizzard":
 					Blizzard.blizzardSpell(player, damageValue, radiusValue, rangeValue, timeValue, strengthValue);

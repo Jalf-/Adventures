@@ -8,13 +8,12 @@ import java.util.Random;
 import me._Jalf_.Adventures.Main;
 import me._Jalf_.Adventures.Methods;
 
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
 public class ArrowRain 
@@ -56,25 +55,12 @@ public class ArrowRain
 						Arrow arrow = player.getWorld().spawnArrow(listLoc, velocity, speed, spread);
 						arrow.setShooter(player);
 						arrow.setBounce(false);
+						arrow.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
 
 						arrowsList.add(arrow); 
 						arrows++;
 					}
-				}
-				plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable()
-				{
-					@Override
-					public void run() 
-					{
-						for (Arrow arrow : arrowsList)
-						{
-							Chunk loadChunk = arrow.getLocation().getChunk();
-							arrow.getWorld().loadChunk(loadChunk);
-
-							arrow.remove();
-						}
-					}
-				}, 35);				
+				}			
 			}
 		}
 	}

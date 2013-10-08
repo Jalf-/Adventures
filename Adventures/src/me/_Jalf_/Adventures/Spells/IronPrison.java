@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import me._Jalf_.Adventures.Main;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -44,7 +45,12 @@ public class IronPrison
 					{	
 						if (entity instanceof LivingEntity)
 						{
-							entitiesInside.add(entity.getLocation().distance(targetBlockLocation));
+							if (entity instanceof Player)
+							{
+								if (!PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+									entitiesInside.add(entity.getLocation().distance(targetBlockLocation));
+							}
+							else entitiesInside.add(entity.getLocation().distance(targetBlockLocation));
 						}
 					}
 				}

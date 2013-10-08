@@ -4,6 +4,7 @@ import me._Jalf_.Adventures.Main;
 
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -15,7 +16,7 @@ public class ArrowLine
 	{
 		ArrowLine.plugin = plugin;
 	}
-	public static void arrowLineSpell (final Player player, final int strength, final int count)
+	public static void arrowLineSpell (final Player player, final int count)
 	{
 		new BukkitRunnable() 
 		{
@@ -43,6 +44,9 @@ public class ArrowLine
 				arrow.setVelocity(new Vector(x,y,z));
 				arrow2.setVelocity(new Vector(x2,y2,z2));
 
+				arrow.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+				arrow2.setMetadata("Shooter", new FixedMetadataValue(plugin, player.getName()));
+				
 				i++;
 				if (i >= count / 2) this.cancel();
 			}

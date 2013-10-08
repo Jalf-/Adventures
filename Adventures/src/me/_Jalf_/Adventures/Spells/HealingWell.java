@@ -5,6 +5,7 @@ import java.util.List;
 
 import me._Jalf_.Adventures.Main;
 import me._Jalf_.Adventures.Methods;
+import me._Jalf_.Adventures.PartyHandler;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -152,12 +153,22 @@ public class HealingWell
 								{	
 									if (entity instanceof LivingEntity)
 									{
-										if (entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.ZOMBIE || 
+										if (entity instanceof Player)
+										{
+											if (PartyHandler.isPlayerPartOfAskingPlayersParty(player, ((Player) entity)))
+											{
+												if (((LivingEntity) entity).getMaxHealth() > ((LivingEntity) entity).getHealth() + heal)
+												{
+													((LivingEntity) entity).setHealth(((LivingEntity) entity).getHealth() + heal);
+												}
+												else ((LivingEntity) entity).setHealth(((LivingEntity) entity).getMaxHealth());
+											}
+										}
+										else if (entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.ZOMBIE || 
 												entity.getType() == EntityType.SKELETON)
 										{
 											((LivingEntity) entity).damage((double) heal);
 										}
-//										if (party is inside well then heal)
 									}
 								}
 							}				
