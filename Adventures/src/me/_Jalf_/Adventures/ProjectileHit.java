@@ -1,5 +1,6 @@
 package me._Jalf_.Adventures;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -31,8 +32,7 @@ public class ProjectileHit implements Listener
 		{	
 			if (entity instanceof LivingEntity)
 			{
-				boolean doNegativeEffect = true;
-				
+				boolean doNegativeEffect = true;	
 				// Check if entity is a player
 				if (entity instanceof Player)
 				{
@@ -40,22 +40,29 @@ public class ProjectileHit implements Listener
 					if (damager.hasMetadata("Shooter"))
 					{
 						String shooter = damager.getMetadata("Shooter").get(0).value().toString();
-
+						
+						// Check if shooter is equal to entity
+						if (shooter.equals(((Player) entity).getName()))
+						{
+							doNegativeEffect = false;
+							damager.remove();
+							event.setCancelled(true);
+						}
+						
 						// Check if shooter is online
 						if (plugin.getServer().getPlayerExact(shooter) != null)
 						{
-							Player shooterPlayer = plugin.getServer().getPlayerExact(shooter);
-
 							// Check if player is in a party
-							if (PartyHandler.getPartyLeader(shooter).length() > 0)
+							if (PartyHandler.getPlayerParty(shooter) != null)
 							{
-								System.out.println(PartyHandler.getPartyMembers(shooterPlayer, "PartyMembers", plugin));
 								// Check if entity hit is any in party
-								for (int i = 0; i < PartyHandler.getPartyMembers(shooterPlayer, "PartyMembers", plugin).size(); i++)
+								for (OfflinePlayer member : PartyHandler.getPartyMembers(PartyHandler.getPlayerParty(shooter)))
 								{
-									if (PartyHandler.getPartyMembers(shooterPlayer, "PartyMembers", plugin).get(i).equals(((Player) entity).getName()))
+									if (member.getName().equals(((Player) entity).getName()))
 									{
 										doNegativeEffect = false;
+										damager.remove();
+										event.setCancelled(true);
 										break;
 									}
 								}
