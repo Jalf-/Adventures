@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class CommandHandler implements CommandExecutor
 {
@@ -49,7 +52,7 @@ public class CommandHandler implements CommandExecutor
 			String classUsage = "/adventures class set <playerName> <className>";
 			
 			String partyUsage = "/adventures party <create, leave, chat>";
-			String partyManageUsage = "/adventures party <invite, join> <playerName>";
+			String partyManageUsage = "/adventures party <invite, join, kick> <playerName>";
 
 			if (args.length == 1)
 			{
@@ -61,6 +64,7 @@ public class CommandHandler implements CommandExecutor
 					if (sender instanceof Player)
 					{
 						Player player = (Player) sender;
+						
 						if (plugin.getSaves().getString(player.getName() + ".Class").equalsIgnoreCase("Wizard"))
 						{
 							player.sendMessage("You're a " + plugin.getSaves().getString(player.getName() + ".Class") + ", Harry!");
@@ -211,17 +215,20 @@ public class CommandHandler implements CommandExecutor
 					{
 						Player player = (Player) sender;
 						// Check if player is in a party
-						if (player.hasMetadata("PartyLeader"))
+						if (PartyHandler.getPlayerParty(player.getName()) != null)
 						{
 							sender.sendMessage("----------Party----------");
 							// Check if player is the party leader
-							if (PartyHandler.getPartyLeader(player.getName()).equals(player.getName())) sender.sendMessage("You are the party leader!");
-							else sender.sendMessage(PartyHandler.getPartyLeader(player.getName()) + " is the party leader!");
+							if (PartyHandler.getPlayerParty(player.getName()).equals(player.getName())) sender.sendMessage("You are the party leader!");	
+							else sender.sendMessage(PartyHandler.getPlayerParty(player.getName()) + " is the party leader!");
 							
 							// Print members
-							for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
+							for (OfflinePlayer member : PartyHandler.getPartyMembers(PartyHandler.getPlayerParty(player.getName())))
 							{
-								sender.sendMessage(member + " is part of the party.");
+								if (!PartyHandler.getPlayerParty(player.getName()).equals(member.getName()))
+								{
+									sender.sendMessage(member.getName() + " is part of the party.");
+								}
 							}
 							sender.sendMessage(partyUsage);
 							sender.sendMessage(partyManageUsage);
@@ -334,7 +341,6 @@ public class CommandHandler implements CommandExecutor
 					}
 					else sender.sendMessage(reloadUsage);
 				}
-				
 				
 				else if (args[0].equalsIgnoreCase("spell"))
 				{
@@ -456,106 +462,30 @@ public class CommandHandler implements CommandExecutor
 						if (args[1].equalsIgnoreCase("create"))
 						{
 							// Check if party exists
-							if (PartyHandler.getPartyLeader(player.getName()).isEmpty())
+							if (PartyHandler.getPlayerParty(player.getName()) != null)
 							{
-								sender.sendMessage("You have created you own party!");
-								player.setMetadata("PartyLeader", new FixedMetadataValue(plugin, player.getName()));
-								player.setMetadata("PartyMembers", new FixedMetadataValue(plugin, player.getName()));
+								if (PartyHandler.getPlayerParty(player.getName()).equals(player.getName())) sender.sendMessage("You have already created a party!");
+								else sender.sendMessage("You are in " + PartyHandler.getPlayerParty(player.getName()) + "'s party");
+							}		
+							else
+							{
+								sender.sendMessage("You have created your own party!");
+								Team team = plugin.getServer().getScoreboardManager().getMainScoreboard().registerNewTeam(player.getName());
+								team.addPlayer(player);
+								team.setAllowFriendlyFire(false);
 							}
-							else sender.sendMessage("You are already in a party with " + PartyHandler.getPartyLeader(player.getName()));
 						}
 						else if (args[1].equalsIgnoreCase("leave"))
 						{
-							// Check if party exists
-							if (!PartyHandler.getPartyLeader(player.getName()).isEmpty())
-							{
-								sender.sendMessage("You have left the party!");
-								player.removeMetadata("PartyChat", plugin);
-								// Check for party size
-								if (PartyHandler.getPartyMembers(player, "PartyMembers", plugin).size() != 2)
-								{
-									// Check if quitting player is party leader
-									if (player.getName().equals(PartyHandler.getPartyLeader(player.getName())))
-									{
-										if (player.hasMetadata("PartyMembers"))
-										{
-											List<String> members = new ArrayList<>();
-
-											for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-											{
-												if (!member.equals(player.getName())) members.add(member);
-											}
-
-											// Select new leader
-											Player newLeader = plugin.getServer().getPlayerExact(PartyHandler.getPartyMembers(player, 
-													"PartyMembers", plugin).get(0).toString());
-											if (newLeader.equals(player))
-											{
-												newLeader = plugin.getServer().getPlayerExact(PartyHandler.getPartyMembers(player, "PartyMembers", plugin).get(1).toString());
-											}
-
-											// Setting up new party
-											for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-											{
-												PartyHandler.removeParty(member);
-												if (!member.equals(player.getName()))
-												{
-													plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left the party!");
-
-													plugin.getServer().getPlayerExact(member).setMetadata("PartyLeader", new FixedMetadataValue(plugin, newLeader));
-													plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
-															new FixedMetadataValue(plugin, members.remove(member)));
-
-													if (newLeader.getName().equals(member))
-													{
-														plugin.getServer().getPlayerExact(member).sendMessage("You are now the new leader for this party!");
-													}
-													else plugin.getServer().getPlayerExact(member).sendMessage(newLeader + " is now the new leader for this party!");
-												}
-											}
-										}
-										else
-										{
-											player.removeMetadata("PartyLeader", plugin);
-										}
-									}
-									else
-									{
-										List<String> members = new ArrayList<>();
-										
-										for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-										{
-											if (!member.equals(player.getName())) members.add(member);
-										}			
-										for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-										{
-											plugin.getServer().getPlayerExact(member).removeMetadata("PartyMembers", plugin);
-											if (!member.equals(player.getName()))
-											{
-												plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left the party!");
-												
-												plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
-														new FixedMetadataValue(plugin, members.remove(member)));
-											}
-										}
-										PartyHandler.removeParty(player.getName());
-									}
-								}
-								else
-								{
-									for (String playerName : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-									{
-										PartyHandler.removeParty(playerName);
-										plugin.getServer().getPlayerExact(playerName).sendMessage("Everyone left your party!");
-									}
-								}
-							}
-							else sender.sendMessage("You are not in a party!");
+							Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();
+							PartyHandler.partyLeave(player, board);
+							player.removeMetadata("PartyChat", plugin);
+							sender.sendMessage("You have left the party!");
 						}
 						else if (args[1].equalsIgnoreCase("chat"))
 						{
 							// Check if player is in party
-							if (player.hasMetadata("PartyLeader"))
+							if (PartyHandler.getPlayerParty(player.getName()) != null)
 							{
 								// Check if player has used this command before
 								if (player.hasMetadata("PartyChat"))
@@ -829,17 +759,16 @@ public class CommandHandler implements CommandExecutor
 							if (args[1].equalsIgnoreCase("invite"))
 							{
 								// Check if player has rights to invite
-								if (player.hasMetadata("PartyLeader") && player.getMetadata("PartyLeader").equals(player.getName()))
+								if (PartyHandler.getPlayerParty(player.getName()) != null && PartyHandler.getPlayerParty(player.getName()).equals(player.getName()))
 								{
 									// Check if other player is in a party
-									if (!plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyLeader"))
+									if (PartyHandler.getPlayerParty(otherPlayer) == null)
 									{
-										if (PartyHandler.partyInviteMap.containsKey(otherPlayer))
-										{
-											PartyHandler.partyInviteMap.remove(otherPlayer);
-											PartyHandler.partyInviteMap.put(otherPlayer, player.getName());
-										}
-										else PartyHandler.partyInviteMap.put(otherPlayer, player.getName());
+										if (PartyHandler.partyInviteMap.containsKey(otherPlayer)) PartyHandler.partyInviteMap.remove(otherPlayer);
+										
+										sender.sendMessage("You have invited " + otherPlayer + " to your party!");
+										plugin.getServer().getPlayerExact(otherPlayer).sendMessage(player.getName() + " has invited you to his party!");
+										PartyHandler.partyInviteMap.put(otherPlayer, player.getName());
 									}
 									else sender.sendMessage(otherPlayer + " is already in a party!");
 								}
@@ -848,50 +777,53 @@ public class CommandHandler implements CommandExecutor
 							else if (args[1].equalsIgnoreCase("join"))
 							{
 								// Check if player is not in a party
-								if (!player.hasMetadata("PartyLeader"))
+								if (PartyHandler.getPlayerParty(player.getName()) == null)
 								{
 									// Check if other player is a party leader
-									if (plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyLeader") && 
-											plugin.getServer().getPlayerExact(otherPlayer).getMetadata("PartyLeader").equals(otherPlayer))
+									if (PartyHandler.getPlayerParty(otherPlayer) != null && PartyHandler.getPlayerParty(otherPlayer).equals(otherPlayer))
 									{
-										if (plugin.getServer().getPlayerExact(otherPlayer).hasMetadata("PartyMembers"))
+										// Check if party is full
+										if (PartyHandler.getPartyMembers(otherPlayer).size() < 4)
 										{
-											// Check if party is full
-											if (PartyHandler.getPartyMembers(plugin.getServer().getPlayerExact(otherPlayer), "PartyMembers", plugin).size() < 4)
+											// Check if other player had invited player to party
+											if (PartyHandler.partyInviteMap.containsKey(player.getName()) && 
+													PartyHandler.partyInviteMap.get(player.getName()).equals(otherPlayer))
 											{
-												// Check if other player had invited player to party
-												if (PartyHandler.partyInviteMap.containsKey(otherPlayer) && 
-														PartyHandler.partyInviteMap.get(player.getName()).equals(otherPlayer))
+												sender.sendMessage("You are now part of the party!");
+												
+												PartyHandler.partyInviteMap.remove(player.getName());
+												
+												for (OfflinePlayer member : PartyHandler.getPartyMembers(otherPlayer))
 												{
-													PartyHandler.partyInviteMap.remove(player.getName());
-													
-													List<String> members = new ArrayList<>();
-													
-													for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-													{
-														members.add(member);
-													}
-													members.add(player.getName());
-													player.setMetadata("PartyLeader", new FixedMetadataValue(plugin, otherPlayer));
-													
-													for (String member : PartyHandler.getPartyMembers(player, "PartyMembers", plugin))
-													{
-														plugin.getServer().getPlayerExact(member).removeMetadata("PartyMembers", plugin);
-														plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has joined your party!");
-
-														plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
-																new FixedMetadataValue(plugin, members));
-													}
+													member.getPlayer().sendMessage(player.getName() + " has joined the party!");
 												}
-												else sender.sendMessage(otherPlayer + " has not invited you to his party!");
+												Team team = plugin.getServer().getScoreboardManager().getMainScoreboard().getTeam(otherPlayer);
+												team.addPlayer(player);
 											}
-											else sender.sendMessage(otherPlayer + "'s party is already ");
+											else sender.sendMessage(otherPlayer + " has not invited you to his party!");
 										}
-										else System.out.println("Error in " + CommandHandler.class.getName() + " under /adventures party join!");
+										else sender.sendMessage(otherPlayer + "'s party is already full");
 									}
 									else sender.sendMessage(otherPlayer + " is not party leader!");
 								}
-								else sender.sendMessage("You are in a party!");								
+								else sender.sendMessage("You are in a party!");							
+							}
+							else if (args[1].equalsIgnoreCase("kick"))
+							{
+								// Check if player has rights to invite
+								if (PartyHandler.getPlayerParty(player.getName()) != null && PartyHandler.getPlayerParty(player.getName()).equals(player.getName()))
+								{
+									// Check if player is in party
+									if (PartyHandler.isPlayerPartOfAskingPlayersParty(player, plugin.getServer().getOfflinePlayer(otherPlayer).getPlayer()))
+									{
+										Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();
+										PartyHandler.partyLeave(plugin.getServer().getOfflinePlayer(otherPlayer).getPlayer(), board);
+										plugin.getServer().getOfflinePlayer(otherPlayer).getPlayer().removeMetadata("PartyChat", plugin);
+										plugin.getServer().getOfflinePlayer(otherPlayer).getPlayer().sendMessage("You have been kicked from the party!");
+									}
+									else sender.sendMessage(otherPlayer + " is not in your party!");
+								}
+								else sender.sendMessage("You are not party leader!");
 							}
 							else sender.sendMessage(partyManageUsage);
 						}

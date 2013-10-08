@@ -1,17 +1,16 @@
 package me._Jalf_.Adventures;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class PartyHandler implements Listener
 {
@@ -24,113 +23,110 @@ public class PartyHandler implements Listener
 	}
 	
 	public static HashMap<String, String> partyInviteMap = new HashMap<>();
-
-	@EventHandler
-	public void playerQuit(PlayerQuitEvent event)
-	{	
-		Player player = event.getPlayer();
-
+	
+	/**@param player
+	 * Player leaving
+	 * @param board
+	 * Scoreboard object
+	 */
+	public static void partyLeave(Player player, Scoreboard board)
+	{
 		// Check if party exists
-		if (!getPartyLeader(player.getName()).isEmpty())
+		if (getPlayerParty(player.getName()) != null)
 		{
 			// Check for party size
-			if (getPartyMembers(player, "PartyMembers", plugin).size() > 2)
+			if (getPartyMembers(getPlayerParty(player.getName())).size() <= 2)
+			{
+				// Remove party
+				for (OfflinePlayer member : getPartyMembers(getPlayerParty(player.getName())))
+				{
+					if (!member.getName().equals(player.getName()))
+					{
+						member.getPlayer().sendMessage(player.getName() + " left the party!");
+						member.getPlayer().sendMessage("Party removed because lack of players!");
+					}
+				}
+				board.getTeam(getPlayerParty(player.getName())).unregister();
+			}
+			else 
 			{
 				// Check if quitting player is party leader
-				if (player.getName().equals(getPartyLeader(player.getName())))
+				if (player.getName().equals(getPlayerParty(player.getName())))
 				{
-					if (player.hasMetadata("PartyMembers"))
+					String highestLvlPlayer = "";
+					int highestLvl = 0;
+
+					Set<OfflinePlayer> members = getPartyMembers(getPlayerParty(player.getName()));
+
+					// Get highest lvl player in party
+					for (OfflinePlayer member : members)
 					{
-						List<String> members = new ArrayList<>();
-
-						for (String member : getPartyMembers(player, "PartyMembers", plugin))
+						if (!member.getName().equals(player.getName()))
 						{
-							if (!member.equals(player.getName())) members.add(member);
-						}
-
-						// Select new leader
-						Player newLeader = plugin.getServer().getPlayerExact(getPartyMembers(player, "PartyMembers", plugin).get(0).toString());
-						if (newLeader.equals(player))
-						{
-							newLeader = plugin.getServer().getPlayerExact(getPartyMembers(player, "PartyMembers", plugin).get(1).toString());
-						}
-
-						// Setting up new party
-						for (String member : getPartyMembers(player, "PartyMembers", plugin))
-						{
-							removeParty(member);
-							if (!member.equals(player.getName()))
+							if (member.getPlayer().getLevel() > highestLvl)
 							{
-								plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left the party!");
-
-								plugin.getServer().getPlayerExact(member).setMetadata("PartyLeader", new FixedMetadataValue(plugin, newLeader));
-								plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
-										new FixedMetadataValue(plugin, members.remove(member)));
-
-								if (newLeader.getName().equals(member))
-								{
-									plugin.getServer().getPlayerExact(member).sendMessage("You are now the new leader for this party!");
-								}
-								else plugin.getServer().getPlayerExact(member).sendMessage(newLeader + " is now the new leader for this party!");
+								highestLvl = member.getPlayer().getLevel();
+								highestLvlPlayer = member.getName();
 							}
 						}
 					}
-					else
+					// Creating new team
+					Team team = plugin.getServer().getScoreboardManager().getMainScoreboard().registerNewTeam(highestLvlPlayer);
+					team.setAllowFriendlyFire(false);
+
+					members.remove(plugin.getServer().getOfflinePlayer(player.getName()));
+					board.getTeam(getPlayerParty(player.getName())).unregister();
+
+					plugin.getServer().getPlayerExact(highestLvlPlayer).sendMessage("You are the new party leader!");
+
+					for (OfflinePlayer member : members)
 					{
-						player.removeMetadata("PartyLeader", plugin);
-					}
+						team.addPlayer(member);
+					} 
 				}
 				else
 				{
-					List<String> members = new ArrayList<>();
-					
-					for (String member : getPartyMembers(player, "PartyMembers", plugin))
+					// Remove party
+					for (OfflinePlayer member : getPartyMembers(getPlayerParty(player.getName())))
 					{
-						if (!member.equals(player.getName())) members.add(member);
-					}			
-					for (String member : getPartyMembers(player, "PartyMembers", plugin))
-					{
-						plugin.getServer().getPlayerExact(member).removeMetadata("PartyMembers", plugin);
-						if (!member.equals(player.getName()))
+						if (!member.getName().equals(player.getName()))
 						{
-							plugin.getServer().getPlayerExact(member).sendMessage(player.getName() + " has left your party!");
-							
-							plugin.getServer().getPlayerExact(member).setMetadata("PartyMembers", 
-									new FixedMetadataValue(plugin, members.remove(member)));
+							member.getPlayer().sendMessage(player.getName() + " left the party!");
 						}
 					}
-					removeParty(player.getName());
-				}
-			}
-			else
-			{
-				for (String playerName : getPartyMembers(player, "PartyMembers", plugin))
-				{
-					removeParty(playerName);
-					plugin.getServer().getPlayerExact(playerName).sendMessage("Everyone left your party!");
+					board.getTeam(getPlayerParty(player.getName())).removePlayer(player);
 				}
 			}
 		}
+		else player.sendMessage("You are not in a party!");
+	}
+	
+	@EventHandler
+	public void playerQuit(PlayerQuitEvent event)
+	{
+		Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();
+		Player player = event.getPlayer();
+
+		partyLeave(player, board);		
 	}
 	
 	@EventHandler
 	public static void onPlayerChat(AsyncPlayerChatEvent event)
 	{
 		Player player = event.getPlayer();
-		
 		// Check if player have or is party leader
-		if (getPartyLeader(player.getName()) != null)
+		if (getPlayerParty(player.getName()) != null)
 		{
 			// Check if party size is greater than 1
-			if (getPartyMembers(player, "PartyMembers", plugin).size() > 1)
+			if (getPartyMembers(getPlayerParty(player.getName())).size() > 1)
 			{
 				// Check if player want to do party chat
-				if (player.getMetadata("PartyChat").equals("true"))
+				if (player.getMetadata("PartyChat").get(0).value().toString().equalsIgnoreCase("true"))
 				{
 					// Printing messages
-					for (String member : getPartyMembers(player, "PartyMembers", plugin))
+					for (OfflinePlayer member : getPartyMembers(getPlayerParty(player.getName())))
 					{
-						plugin.getServer().getPlayerExact(member).sendMessage(event.getFormat() + "[P]" + event.getMessage());
+						member.getPlayer().sendMessage("[P] <" + player.getName()+ "> " + event.getMessage());
 					}
 					event.setCancelled(true);
 				}
@@ -138,56 +134,45 @@ public class PartyHandler implements Listener
 		}
 	}
 	
-	/**@param player
-	 * Player bbject
-	 * @param key
-	 * Metadata string wanted to be checked
-	 * @param plugin
-	 * Plugin instance
-	 * @return Value of metadata string if it exists else it will return empty space
+	/**@param teamName
+	 * Name of the scoreboard team
+	 * @return Player(s) in the scoreboard team 
 	 */
-	public static List<String> getPartyMembers(Player player, String key, Plugin plugin)
+	public static Set<OfflinePlayer> getPartyMembers(String teamName)
 	{
-		List<String> members = new ArrayList<>();
-		
-		if (player.hasMetadata(key))
-		{
-			List<MetadataValue> values = player.getMetadata(key);  
-			for(MetadataValue value : values)
-			{
-				if(value.getOwningPlugin().getDescription().getName().equals(plugin.getDescription().getName()))
-				{
-					members.add(value.asString());
-				}
-			}
-			if (!members.isEmpty())
-			{
-				return members;
-			}
-		}
-		return new ArrayList<>();
-	}
-
-	/**@param name
-	 * Name of player that will get his party removed
-	 */
-	public static void removeParty(String name) 
-	{
-		Player player = plugin.getServer().getPlayerExact(name);
-		
-		player.removeMetadata("PartyChat", plugin);
-		player.removeMetadata("PartyMembers", plugin);
-		player.removeMetadata("PartyLeader", plugin);
+		Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();
+		if (board.getTeam(teamName) == null) return null;
+		if (board.getTeam(teamName).getPlayers().isEmpty()) return null;
+		return board.getTeam(teamName).getPlayers();
 	}
 	
-	/**@param name
+	/**@param playerName
 	 * Name of player that is in a party
-	 * @return Party Leader
+	 * @return Name of players party, same as party leader or null if party do not exists
 	 */
-	public static String getPartyLeader(String name)
+	public static String getPlayerParty(String playerName)
 	{
-		Player player = plugin.getServer().getPlayerExact(name);
+		Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();	
+		Player player = plugin.getServer().getPlayerExact(playerName);
 		
-		return Methods.getMetadata(player, "PartyLeader", plugin).toString();
+		if (board.getPlayerTeam(player) != null) return board.getPlayerTeam(player).getName();
+		return null;		
 	}
+	
+	/**@param askingPlayer
+	 * Player object of the player in a party
+	 * @param player
+	 * Player object to check if is in askingPlayers party
+	 * @return Boolean answer if askingPlayers party contains player then return true else return false
+	 */
+	public static boolean isPlayerPartOfAskingPlayersParty(Player askingPlayer, Player player)
+	{	
+		if (PartyHandler.getPlayerParty(askingPlayer.getName()) != null 
+				&& PartyHandler.getPartyMembers(PartyHandler.getPlayerParty(askingPlayer.getName())).
+					contains(plugin.getServer().getOfflinePlayer((player).getName())))
+		{
+			return true;
+		}		
+		return false;
+	} 
 }
