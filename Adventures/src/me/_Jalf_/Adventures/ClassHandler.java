@@ -1,7 +1,10 @@
 package me._Jalf_.Adventures;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -60,8 +63,30 @@ public class ClassHandler implements Listener
 	@EventHandler
 	public void playerExp (PlayerExpChangeEvent event)
 	{
-		// Multiply gained experience by value specified in config.yml
-		event.setAmount((int) Math.floor(event.getAmount() * (plugin.getConfig().getDouble("Exp Boost") / 100)));
+		Player player = event.getPlayer();
+		// Check if player is in a party
+		if (PartyHandler.getPlayerParty(player.getName()) != null)
+		{
+			List<Player> members = new ArrayList<>();
+			// Check what members are within 75 meter of the player
+			for (OfflinePlayer member : PartyHandler.getPartyMembers(PartyHandler.getPlayerParty(player.getName())))
+			{
+				if (player.getLocation().distanceSquared(member.getPlayer().getLocation()) < 5625)
+				{
+					members.add(member.getPlayer());
+				}
+			}
+			// Share experience
+			for(Player member : members)
+			{
+				member.giveExp((int) Math.ceil(event.getAmount() * (plugin.getConfig().getDouble("Exp Boost") / 100) / members.size()));
+			}
+		}
+		else
+		{
+			// Multiply gained experience by value specified in config.yml
+			event.setAmount((int) Math.ceil(event.getAmount() * (plugin.getConfig().getDouble("Exp Boost") / 100)));
+		}
 	}
 	
 	@EventHandler
