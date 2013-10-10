@@ -27,7 +27,6 @@ public class Main extends JavaPlugin
 		PartyHandler.partyInviteMap = null;
 
 		// Sets all online players spell off cooldown and gives them the spell which was on cooldown if player have item with the name 'Cooldown'
-		// Saves all online players resource in saves.yml
 		for (Player player : getServer().getOnlinePlayers())
 		{
 			// Check if class isn't Default, because Default can't get any spells
@@ -68,11 +67,11 @@ public class Main extends JavaPlugin
 							}
 						}
 					}
-					// Saves all online players resource in saves.yml
-					String resourceName = Methods.getPlayerResourceName(player.getName());      
-					int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName)); 
-					getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", resourceNow);
 				}
+				// Saves all online players(with a class assigned) resource in saves.yml
+				String resourceName = Methods.getPlayerResourceName(player.getName());      
+				int resourceNow = ScoreboardHandler.getScore(player.getName(), DisplaySlot.SIDEBAR, Bukkit.getOfflinePlayer(resourceName)); 
+				getSaves().set(player.getName() + ".Resource." + resourceName + ".Now", resourceNow);
 			}
 		}
 		// Save saves.yml

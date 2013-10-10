@@ -155,6 +155,7 @@ public class PartyHandler implements Listener
 		Scoreboard board = plugin.getServer().getScoreboardManager().getMainScoreboard();	
 		Player player = plugin.getServer().getPlayerExact(playerName);
 		
+		// Check if team exists and then get the name off it
 		if (board.getPlayerTeam(player) != null) return board.getPlayerTeam(player).getName();
 		return null;		
 	}
@@ -167,6 +168,7 @@ public class PartyHandler implements Listener
 	 */
 	public static boolean isPlayerPartOfAskingPlayersParty(Player askingPlayer, Player player)
 	{	
+		// Check if party exists and if other player is in the party
 		if (PartyHandler.getPlayerParty(askingPlayer.getName()) != null 
 				&& PartyHandler.getPartyMembers(PartyHandler.getPlayerParty(askingPlayer.getName())).
 					contains(plugin.getServer().getOfflinePlayer((player).getName())))
@@ -175,4 +177,6 @@ public class PartyHandler implements Listener
 		}		
 		return false;
 	} 
+	// Share Party Experience
+	// Located in ClassHandler under playerExp (PlayerExpChangeEvent)
 }
