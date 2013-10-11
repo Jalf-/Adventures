@@ -18,7 +18,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 public class Main extends JavaPlugin
 {
 	private Logger log = Logger.getLogger("Minecraft");	
-	
+	// Testing
 	@Override
 	public void onDisable()
 	{	
